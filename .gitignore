@@ -1,0 +1,138 @@
+# Android / Kotlin
+
+# Gradle
+.gradle/
+build/
+**/build/
+
+# Local configuration
+local.properties
+
+# Android Studio
+.idea/
+*.iml
+*.iws
+.idea_modules/
+.navigation/
+captures/
+
+# Keystore files
+*.jks
+*.keystore
+
+# Google Services
+google-services.json
+
+# Android APK/AAB
+*.apk
+*.aab
+*.ap_
+
+# Android profiling
+*.hprof
+
+# Java / Spring Boot
+
+# Compiled class files
+*.class
+
+# Package files
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# Gradle (for Spring Boot)
+gradle/wrapper/gradle-wrapper.jar
+
+# Spring Boot
+spring-boot*.log
+
+# IntelliJ IDEA
+
+.idea/
+*.ipr
+*.iws
+out/
+
+# VS Code
+
+.vscode/
+*.code-workspace
+
+# Docker
+
+# Docker Compose override
+docker-compose.override.yml
+
+# Docker data volumes (if local)
+.docker-data/
+
+# PostgreSQL
+
+# Database dumps
+*.sql
+*.dump
+!schema.sql
+!init.sql
+
+# Environment & Secrets
+
+.env
+.env.local
+.env.*.local
+*.env
+application-local.properties
+application-local.yml
+secrets/
+credentials/
+
+# OS Generated Files
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Linux
+*~
+
+# Logs & Temp Files
+
+*.log
+logs/
+tmp/
+temp/
+*.tmp
+*.temp
+*.swp
+*.swo
+
+# Test & Coverage
+
+.coverage
+coverage/
+*.lcov
+test-results/
+jacoco.exec

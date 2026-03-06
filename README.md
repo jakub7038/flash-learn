@@ -27,14 +27,6 @@ System opiera się na architekturze klient-serwer z podejściem **offline-first*
 * **Moduł Synchronizacji:** Zarządzanie spójnością danych między urządzeniem a serwerem.
 * **Moduł Społecznościowy:** Marketplace umożliwiający udostępnianie i pobieranie publicznych talii.
 
-## Sprint Backlog (to jest jeszcze do edycji)
-1. **Sprint 1**
-2. **Sprint 2**
-3. **Sprint 3:**
-4. **Sprint 4**
-5. **Sprint 5** 
-6. **Sprint 6** 
-
 ## Uruchomienie lokalne
 
 ### Backend
