@@ -1,6 +1,15 @@
 # FlashLearn
 FlashLearn to innowacyjna aplikacja mobilna do nauki, która rozwiązuje problem nieefektywnego zapamiętywania poprzez wykorzystanie krzywej zapominania Ebbinghausa. System automatyzuje proces tworzenia materiałów dzięki AI oraz optymalizuje powtórki za pomocą algorytmu spaced repetition.
 
+## Wizja projektu
+Tradycyjne metody nauki są pasywne i nieefektywne, co sprawia, że człowiek zapomina większość nowego materiału w ciągu doby. FlashLearn rozwiązuje ten problem, automatyzując tworzenie fiszek przy pomocy AI i optymalizując proces powtórek algorytmem spaced repetition. Projekt ma na celu wyeliminowanie braków istniejących rozwiązań, takich jak przestarzałe interfejsy, brak synchronizacji czy konieczność ręcznego tworzenia materiałów.
+
+## Opis MVP
+* **Generowanie fiszek przez AI**: Automatyczne tworzenie par pytanie/odpowiedź z surowego tekstu z opcją weryfikacji i edycji przed zapisaniem.
+* **Algorytm SM-2**: Personalizacja sesji nauki na podstawie ocen trudności (Nie wiem / Trudne / Łatwe) wystawianych przez użytkownika.
+* **Synchronizacja i Marketplace**: Bezpieczne zarządzanie kontami (JWT), synchronizacja z bazą PostgreSQL oraz platforma do wymiany publicznych talii.
+* **Tryb Offline-First**: Możliwość nauki i tworzenia treści bez dostępu do sieci dzięki lokalnej bazie Room, z synchronizacją w tle.
+
 ## Zespół
 * **Jakub Siłka** – [@jakub7038](https://github.com/jakub7038)
 * **Paweł Powęska** – [@SpeedYoo](https://github.com/SpeedYoo)
