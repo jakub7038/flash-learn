@@ -172,6 +172,68 @@ sequenceDiagram
 
 ### Backend
 
+**Wymagania:** Docker i Docker Compose
+
+1. Przejdź do folderu `docker/`:
+```bash
+cd docker
+```
+
+2. Skopiuj `.env.example` jako `.env`:
+```bash
+cp .env.example .env
+```
+
+3. (Opcjonalnie) Edytuj `.env` i zmień hasła:
+```properties
+POSTGRES_DB=flashlearn
+POSTGRES_USER=flashlearn_user
+POSTGRES_PASSWORD=twoje_haslo        # zmień na własne
+JWT_SECRET=twoj_sekret               # zmień na własne (openssl rand -hex 64)
+JWT_EXPIRATION_MS=3600000
+```
+
+4. Uruchom kontenery:
+```bash
+docker-compose up -d
+```
+
+5. Sprawdź czy działa:
+```bash
+docker-compose ps
+```
+
+Backend będzie dostępny na `http://localhost:8080`
+
+**Przydatne komendy:**
+- Logi: `docker-compose logs -f app`
+- Stop: `docker-compose down`
+- Reset (usuwa dane): `docker-compose down -v`
+
 ### Android
+
+**Wymagania:** Android Studio
+
+1. Otwórz folder `android/` w Android Studio
+2. Skopiuj plik konfiguracyjny:
+```bash
+cp android/app/src/main/assets/config.properties.example android/app/src/main/assets/config.properties
+```
+3. Edytuj `config.properties` według sposobu uruchomienia:
+
+**Emulator Android Studio:**
+```properties
+API_BASE_URL=http://10.0.2.2:8080/
+```
+> `10.0.2.2` to specjalny adres - emulator mapuje go na `localhost` komputera
+
+**Telefon fizyczny (USB lub WiFi):**
+```properties
+API_BASE_URL=http://TWOJE_IP:8080/
+```
+> Sprawdź IP komputera: `ipconfig` (Windows) lub `ifconfig` (Linux/Mac)
+> Telefon i komputer muszą być w tej samej sieci WiFi
+
+4. Uruchom aplikację (Shift+F10)
 
 ## Dokumentacja API
