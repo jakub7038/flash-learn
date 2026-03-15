@@ -87,13 +87,17 @@ fun RegisterScreen(
         }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background
     ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
         Text(
             text = "Rejestracja",
             style = MaterialTheme.typography.headlineMedium,
@@ -178,6 +182,7 @@ fun RegisterScreen(
 
         TextButton(onClick = onNavigateToLogin) {
             Text("Masz już konto? Zaloguj się")
+        }
         }
     }
 }

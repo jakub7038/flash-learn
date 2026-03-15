@@ -8,7 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun DeckListScreen() {
+fun LearnScreen() {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -17,12 +17,12 @@ fun DeckListScreen() {
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "Moje talie",
+            text = "Nauka",
             style = MaterialTheme.typography.headlineMedium
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "Lista Twoich talii fiszek",
+            text = "Tutaj rozpoczniesz sesję nauki z algorytmem SM-2",
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )

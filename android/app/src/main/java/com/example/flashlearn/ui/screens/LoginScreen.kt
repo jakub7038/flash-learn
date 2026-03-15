@@ -76,13 +76,17 @@ fun LoginScreen(
         }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background
     ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
         Text(
             text = "Logowanie",
             style = MaterialTheme.typography.headlineMedium,
@@ -150,6 +154,7 @@ fun LoginScreen(
 
         TextButton(onClick = onNavigateToRegister) {
             Text("Nie masz konta? Zarejestruj się")
+        }
         }
     }
 }
