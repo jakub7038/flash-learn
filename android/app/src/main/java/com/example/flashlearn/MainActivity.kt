@@ -14,7 +14,9 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.flashlearn.data.local.TokenManager
 import com.example.flashlearn.data.remote.RetrofitClient
+import com.example.flashlearn.ui.screens.LoginScreen
 import com.example.flashlearn.ui.screens.RegisterScreen
 import com.example.flashlearn.ui.theme.FlashLearnTheme
 
@@ -22,6 +24,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         RetrofitClient.init(applicationContext)
+        TokenManager.init(applicationContext)
         enableEdgeToEdge()
         setContent {
             FlashLearnTheme {
@@ -34,7 +37,8 @@ class MainActivity : ComponentActivity() {
                     ) {
                         composable("home") {
                             HomeScreen(
-                                onNavigateToRegister = { navController.navigate("register") }
+                                onNavigateToRegister = { navController.navigate("register") },
+                                onNavigateToLogin = { navController.navigate("login") }
                             )
                         }
                         composable("register") {
@@ -44,8 +48,23 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                         composable("login") {
-                            LoginPlaceholder(
-                                onBack = { navController.popBackStack("home", inclusive = false) }
+                            LoginScreen(
+                                onLoginSuccess = {
+                                    navController.navigate("logged_in") {
+                                        popUpTo("home") { inclusive = true }
+                                    }
+                                },
+                                onNavigateToRegister = { navController.navigate("register") }
+                            )
+                        }
+                        composable("logged_in") {
+                            LoggedInScreen(
+                                onLogout = {
+                                    TokenManager.clearTokens()
+                                    navController.navigate("home") {
+                                        popUpTo("logged_in") { inclusive = true }
+                                    }
+                                }
                             )
                         }
                     }
@@ -56,7 +75,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun HomeScreen(onNavigateToRegister: () -> Unit) {
+fun HomeScreen(onNavigateToRegister: () -> Unit, onNavigateToLogin: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -70,6 +89,13 @@ fun HomeScreen(onNavigateToRegister: () -> Unit) {
             modifier = Modifier.padding(bottom = 32.dp)
         )
         Button(
+            onClick = onNavigateToLogin,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Zaloguj się")
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+        OutlinedButton(
             onClick = onNavigateToRegister,
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -79,7 +105,7 @@ fun HomeScreen(onNavigateToRegister: () -> Unit) {
 }
 
 @Composable
-fun LoginPlaceholder(onBack: () -> Unit) {
+fun LoggedInScreen(onLogout: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -87,18 +113,8 @@ fun LoginPlaceholder(onBack: () -> Unit) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text(
-            text = "Ekran logowania (TODO)",
-            style = MaterialTheme.typography.headlineMedium,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
-        Text(
-            text = "Rejestracja zakończona pomyślnie!",
-            style = MaterialTheme.typography.bodyLarge,
-            modifier = Modifier.padding(bottom = 32.dp)
-        )
-        Button(onClick = onBack) {
-            Text("Wróć do strony głównej")
+        Button(onClick = onLogout) {
+            Text("Wyloguj")
         }
     }
 }
@@ -107,6 +123,6 @@ fun LoginPlaceholder(onBack: () -> Unit) {
 @Composable
 fun HomeScreenPreview() {
     FlashLearnTheme {
-        HomeScreen(onNavigateToRegister = {})
+        HomeScreen(onNavigateToRegister = {}, onNavigateToLogin = {})
     }
 }
