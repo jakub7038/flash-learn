@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     id("com.google.devtools.ksp")
+    id("com.google.dagger.hilt.android")
 }
 
 android {
@@ -56,15 +57,27 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
+
+    // retrofit
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
+
+    // navigation & security
     implementation("androidx.navigation:navigation-compose:2.7.7")
     implementation("androidx.security:security-crypto:1.1.0-alpha06")
+
+    // room
     implementation("androidx.room:room-runtime:${room_version}")
     implementation("androidx.room:room-ktx:${room_version}")
     ksp("androidx.room:room-compiler:$room_version")
+
+    // hilt
+    implementation("com.google.dagger:hilt-android:2.59.2")
+    ksp("com.google.dagger:hilt-android-compiler:2.59.2")
+    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+
     testImplementation("androidx.room:room-testing:${room_version}")
     testImplementation("org.robolectric:robolectric:4.11.1")
     testImplementation("androidx.test:core-ktx:1.5.0")

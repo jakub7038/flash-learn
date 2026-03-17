@@ -9,27 +9,31 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
-import com.example.flashlearn.data.local.TokenManager
-import com.example.flashlearn.data.remote.LoginRequest
-import com.example.flashlearn.data.remote.RetrofitClient
-import kotlinx.coroutines.launch
-import retrofit2.HttpException
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.flashlearn.ui.auth.AuthUiState
+import com.example.flashlearn.ui.auth.AuthViewModel
 
 @Composable
 fun LoginScreen(
     onLoginSuccess: () -> Unit,
-    onNavigateToRegister: () -> Unit
+    onNavigateToRegister: () -> Unit,
+    viewModel: AuthViewModel = hiltViewModel()
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-
     var emailError by remember { mutableStateOf<String?>(null) }
     var passwordError by remember { mutableStateOf<String?>(null) }
-    var apiError by remember { mutableStateOf<String?>(null) }
 
-    var isLoading by remember { mutableStateOf(false) }
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    val scope = rememberCoroutineScope()
+    // Kiedy ViewModel zgłosi sukces → przejdź dalej
+    LaunchedEffect(uiState) {
+        if (uiState is AuthUiState.Success) {
+            viewModel.resetState()
+            onLoginSuccess()
+        }
+    }
 
     fun validateEmail(): Boolean {
         emailError = when {
@@ -49,30 +53,10 @@ fun LoginScreen(
     }
 
     fun login() {
-        apiError = null
         val isEmailValid = validateEmail()
         val isPasswordValid = validatePassword()
-
         if (isEmailValid && isPasswordValid) {
-            isLoading = true
-            scope.launch {
-                try {
-                    val response = RetrofitClient.authApi.login(LoginRequest(email, password))
-                    TokenManager.saveTokens(response.accessToken, response.refreshToken)
-                    isLoading = false
-                    onLoginSuccess()
-                } catch (e: HttpException) {
-                    isLoading = false
-                    apiError = when (e.code()) {
-                        401 -> "Nieprawidłowy email lub hasło"
-                        404 -> "Konto nie istnieje"
-                        else -> "Błąd serwera: ${e.code()}"
-                    }
-                } catch (e: Exception) {
-                    isLoading = false
-                    apiError = "Błąd połączenia z serwerem"
-                }
-            }
+            viewModel.login(email, password)  // ← ViewModel robi resztę
         }
     }
 
@@ -87,74 +71,75 @@ fun LoginScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-        Text(
-            text = "Logowanie",
-            style = MaterialTheme.typography.headlineMedium,
-            modifier = Modifier.padding(bottom = 32.dp)
-        )
-
-        OutlinedTextField(
-            value = email,
-            onValueChange = {
-                email = it
-                if (emailError != null) validateEmail()
-            },
-            label = { Text("Email") },
-            isError = emailError != null,
-            supportingText = emailError?.let { { Text(it) } },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        OutlinedTextField(
-            value = password,
-            onValueChange = {
-                password = it
-                if (passwordError != null) validatePassword()
-            },
-            label = { Text("Hasło") },
-            isError = passwordError != null,
-            supportingText = passwordError?.let { { Text(it) } },
-            visualTransformation = PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        if (apiError != null) {
-            Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = apiError!!,
-                color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodyMedium
+                text = "Logowanie",
+                style = MaterialTheme.typography.headlineMedium,
+                modifier = Modifier.padding(bottom = 32.dp)
             )
-        }
 
-        Spacer(modifier = Modifier.height(24.dp))
+            OutlinedTextField(
+                value = email,
+                onValueChange = {
+                    email = it
+                    if (emailError != null) validateEmail()
+                },
+                label = { Text("Email") },
+                isError = emailError != null,
+                supportingText = emailError?.let { { Text(it) } },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
+            )
 
-        Button(
-            onClick = { login() },
-            enabled = !isLoading,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            if (isLoading) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(24.dp),
-                    color = MaterialTheme.colorScheme.onPrimary
+            Spacer(modifier = Modifier.height(16.dp))
+
+            OutlinedTextField(
+                value = password,
+                onValueChange = {
+                    password = it
+                    if (passwordError != null) validatePassword()
+                },
+                label = { Text("Hasło") },
+                isError = passwordError != null,
+                supportingText = passwordError?.let { { Text(it) } },
+                visualTransformation = PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            // Błąd z ViewModelu (sieć, serwer)
+            if (uiState is AuthUiState.Error) {
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = (uiState as AuthUiState.Error).message,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodyMedium
                 )
-            } else {
-                Text("Zaloguj się")
             }
-        }
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
-        TextButton(onClick = onNavigateToRegister) {
-            Text("Nie masz konta? Zarejestruj się")
-        }
+            Button(
+                onClick = { login() },
+                enabled = uiState !is AuthUiState.Loading,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                if (uiState is AuthUiState.Loading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
+                } else {
+                    Text("Zaloguj się")
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            TextButton(onClick = onNavigateToRegister) {
+                Text("Nie masz konta? Zarejestruj się")
+            }
         }
     }
 }
