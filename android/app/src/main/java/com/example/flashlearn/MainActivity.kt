@@ -8,7 +8,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.flashlearn.data.local.TokenManager
-import com.example.flashlearn.data.remote.RetrofitClient
 import com.example.flashlearn.ui.screens.LoginScreen
 import com.example.flashlearn.ui.screens.MainScreen
 import com.example.flashlearn.ui.screens.RegisterScreen
@@ -19,7 +18,6 @@ import dagger.hilt.android.AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        RetrofitClient.init(applicationContext)
         TokenManager.init(applicationContext)
         enableEdgeToEdge()
         setContent {

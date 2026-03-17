@@ -27,7 +27,6 @@ fun LoginScreen(
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    // Kiedy ViewModel zgłosi sukces → przejdź dalej
     LaunchedEffect(uiState) {
         if (uiState is AuthUiState.Success) {
             viewModel.resetState()
@@ -56,7 +55,7 @@ fun LoginScreen(
         val isEmailValid = validateEmail()
         val isPasswordValid = validatePassword()
         if (isEmailValid && isPasswordValid) {
-            viewModel.login(email, password)  // ← ViewModel robi resztę
+            viewModel.login(email, password)
         }
     }
 
@@ -108,7 +107,6 @@ fun LoginScreen(
                 modifier = Modifier.fillMaxWidth()
             )
 
-            // Błąd z ViewModelu (sieć, serwer)
             if (uiState is AuthUiState.Error) {
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(

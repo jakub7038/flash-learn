@@ -7,6 +7,7 @@ import com.example.flashlearn.data.remote.LoginResponse
 import com.example.flashlearn.data.remote.RegisterRequest
 import com.example.flashlearn.data.remote.RegisterResponse
 import com.example.flashlearn.domain.repository.AuthRepository
+import retrofit2.HttpException
 import java.io.IOException
 import javax.inject.Inject
 
@@ -21,12 +22,12 @@ class AuthRepositoryImpl @Inject constructor(
             if (response.isSuccessful && response.body() != null) {
                 Result.success(response.body()!!)
             } else {
-                Result.failure(Exception("Błąd logowania: ${response.code()}"))
+                Result.failure(HttpException(response))
             }
         } catch (e: IOException) {
-            Result.failure(Exception("Brak połączenia z internetem"))
+            Result.failure(e)
         } catch (e: Exception) {
-            Result.failure(Exception("Błąd: ${e.message}"))
+            Result.failure(e)
         }
     }
 
@@ -36,12 +37,12 @@ class AuthRepositoryImpl @Inject constructor(
             if (response.isSuccessful && response.body() != null) {
                 Result.success(response.body()!!)
             } else {
-                Result.failure(Exception("Błąd rejestracji: ${response.code()}"))
+                Result.failure(HttpException(response))
             }
         } catch (e: IOException) {
-            Result.failure(Exception("Brak połączenia z internetem"))
+            Result.failure(e)
         } catch (e: Exception) {
-            Result.failure(Exception("Błąd: ${e.message}"))
+            Result.failure(e)
         }
     }
 
