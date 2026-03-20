@@ -8,7 +8,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun CreateScreen() {
+fun CreateScreen(
+    onNavigateToCreateDeck: () -> Unit = {}
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -26,5 +28,12 @@ fun CreateScreen() {
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
+        Spacer(modifier = Modifier.height(32.dp))
+        Button(
+            onClick = onNavigateToCreateDeck,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Nowa talia")
+        }
     }
 }

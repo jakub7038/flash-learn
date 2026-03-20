@@ -4,10 +4,14 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.flashlearn.data.local.TokenManager
+import com.example.flashlearn.data.remote.RetrofitClient
+import com.example.flashlearn.ui.screens.DeckEditScreen
 import com.example.flashlearn.ui.screens.LoginScreen
 import com.example.flashlearn.ui.screens.MainScreen
 import com.example.flashlearn.ui.screens.RegisterScreen
@@ -52,7 +56,25 @@ class MainActivity : ComponentActivity() {
                                 navController.navigate("login") {
                                     popUpTo("main") { inclusive = true }
                                 }
+                            },
+                            onNavigateToCreateDeck = {
+                                navController.navigate("deck/create")
                             }
+                        )
+                    }
+                    composable("deck/create") {
+                        DeckEditScreen(
+                            onNavigateBack = { navController.popBackStack() }
+                        )
+                    }
+                    composable(
+                        route = "deck/edit/{deckId}",
+                        arguments = listOf(navArgument("deckId") { type = NavType.LongType })
+                    ) { backStackEntry ->
+                        val deckId = backStackEntry.arguments?.getLong("deckId") ?: return@composable
+                        DeckEditScreen(
+                            deckId = deckId,
+                            onNavigateBack = { navController.popBackStack() }
                         )
                     }
                 }

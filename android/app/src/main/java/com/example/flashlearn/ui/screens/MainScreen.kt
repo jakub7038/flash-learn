@@ -27,7 +27,10 @@ sealed class BottomNavItem(
 }
 
 @Composable
-fun MainScreen(onLogout: () -> Unit) {
+fun MainScreen(
+    onLogout: () -> Unit,
+    onNavigateToCreateDeck: () -> Unit = {}
+) {
     var selectedItem by remember { mutableStateOf<BottomNavItem>(BottomNavItem.Learn) }
 
     val items = listOf(
@@ -91,7 +94,9 @@ fun MainScreen(onLogout: () -> Unit) {
             when (selectedItem) {
                 BottomNavItem.Learn -> LearnScreen()
                 BottomNavItem.MyDecks -> DeckListScreen()
-                BottomNavItem.Create -> CreateScreen()
+                BottomNavItem.Create -> CreateScreen(
+                    onNavigateToCreateDeck = onNavigateToCreateDeck
+                )
                 BottomNavItem.Explore -> MarketplaceScreen()
                 BottomNavItem.Profile -> DashboardScreen(onLogout = onLogout)
             }
