@@ -4,7 +4,7 @@ spring:
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/flashlearn}
     username: ${SPRING_DATASOURCE_USERNAME:flashlearn_user}
-    password: ${SPRING_DATASOURCE_PASSWORD:change_me_please}
+    password: ${SPRING_DATASOURCE_PASSWORD:123456}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
