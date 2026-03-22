@@ -87,10 +87,11 @@ docker-compose.override.yml
 # PostgreSQL
 
 # Database dumps
-*.sql
 *.dump
+*.sql
 !schema.sql
 !init.sql
+!**/db/migration/*.sql
 
 # Environment & Secrets
 
