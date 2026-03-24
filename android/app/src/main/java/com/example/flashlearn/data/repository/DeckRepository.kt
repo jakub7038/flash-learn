@@ -1,0 +1,27 @@
+package com.example.flashlearn.data.repository
+
+import com.flashlearn.data.dao.DeckDao
+import com.flashlearn.data.entity.Deck
+import kotlinx.coroutines.flow.Flow
+import java.time.Instant
+import javax.inject.Inject
+import javax.inject.Singleton
+
+@Singleton
+class DeckRepository @Inject constructor(
+    private val deckDao: DeckDao
+) {
+    fun observeAllDecks(): Flow<List<Deck>> = deckDao.observeAll()
+
+    suspend fun createDeck(title: String, description: String? = null): Long {
+        val deck = Deck(
+            title = title,
+            description = description,
+            createdAt = Instant.now().epochSecond,
+            updatedAt = Instant.now().epochSecond,
+        )
+        return deckDao.insert(deck)
+    }
+
+    suspend fun deleteDeck(deck: Deck) = deckDao.delete(deck)
+}
