@@ -23,21 +23,21 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.runtime.collectAsState
 import com.example.flashlearn.ui.decklist.DeckListViewModel
-import com.flashlearn.data.entity.Deck
+import com.flashlearn.data.dao.DeckWithCount
 import java.text.SimpleDateFormat
 import java.util.*
 
 @Composable
 fun DeckListScreen(
-    viewModel: DeckListViewModel = hiltViewModel()
+    viewModel: DeckListViewModel = hiltViewModel(),
+    onNavigateToCreateDeck: () -> Unit = {}
 ) {
     val decks by viewModel.decks.collectAsState()
-    var showCreateDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { showCreateDialog = true },
+                onClick = onNavigateToCreateDeck,
                 containerColor = MaterialTheme.colorScheme.primary,
             ) {
                 Icon(Icons.Default.Add, contentDescription = "Nowa talia")
@@ -56,7 +56,7 @@ fun DeckListScreen(
                 exit = fadeOut(),
                 modifier = Modifier.align(Alignment.Center)
             ) {
-                EmptyDecksState(onCreateClick = { showCreateDialog = true })
+                EmptyDecksState(onCreateClick = onNavigateToCreateDeck)
             }
 
             AnimatedVisibility(
@@ -80,27 +80,16 @@ fun DeckListScreen(
                     items(decks, key = { it.id }) { deck ->
                         DeckCard(
                             deck = deck,
-                            onDelete = { viewModel.deleteDeck(deck) }
+                            onDelete = { viewModel.deleteDeck(deck.id) }
                         )
                     }
                 }
             }
         }
     }
-
-    if (showCreateDialog) {
-        CreateDeckDialog(
-            onDismiss = { showCreateDialog = false },
-            onCreate = { title, description ->
-                viewModel.createDeck(title, description)
-                showCreateDialog = false
-            }
-        )
-    }
 }
-
 @Composable
-fun DeckCard(deck: Deck, onDelete: () -> Unit) {
+fun DeckCard(deck: DeckWithCount, onDelete: () -> Unit) {
     val dateFormatter = remember { SimpleDateFormat("dd MMM yyyy", Locale.getDefault()) }
     val lastModified = remember(deck.updatedAt) {
         dateFormatter.format(Date(deck.updatedAt * 1000L))
@@ -111,7 +100,7 @@ fun DeckCard(deck: Deck, onDelete: () -> Unit) {
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
         )
     ) {
         Row(
@@ -151,7 +140,8 @@ fun DeckCard(deck: Deck, onDelete: () -> Unit) {
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    DeckInfoChip(text = "Ostatnia nauka: $lastModified")
+                    DeckInfoChip(text = "Fiszki: ${deck.flashcardCount}")
+                    DeckInfoChip(text = "Ostatnia aktualizacja: $lastModified")
                 }
                 deck.description?.let { desc ->
                     if (desc.isNotBlank()) {
@@ -228,55 +218,3 @@ private fun EmptyDecksState(onCreateClick: () -> Unit) {
     }
 }
 
-// ── Dialog tworzenia talii ─────────────────────────────────────────────────────
-
-@Composable
-private fun CreateDeckDialog(
-    onDismiss: () -> Unit,
-    onCreate: (title: String, description: String?) -> Unit
-) {
-    var title by remember { mutableStateOf("") }
-    var description by remember { mutableStateOf("") }
-    val isTitleError = title.isBlank() && title.isNotEmpty() == false && false // validate on submit
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Nowa talia") },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                OutlinedTextField(
-                    value = title,
-                    onValueChange = { title = it },
-                    label = { Text("Nazwa talii *") },
-                    singleLine = true,
-                    isError = isTitleError,
-                    modifier = Modifier.fillMaxWidth()
-                )
-                OutlinedTextField(
-                    value = description,
-                    onValueChange = { description = it },
-                    label = { Text("Opis (opcjonalny)") },
-                    maxLines = 3,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-        },
-        confirmButton = {
-            Button(
-                onClick = {
-                    if (title.isNotBlank()) {
-                        onCreate(title, description.ifBlank { null })
-                    }
-                },
-                enabled = title.isNotBlank()
-            ) {
-                Text("Utwórz")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Anuluj")
-            }
-        }
-    )
-}

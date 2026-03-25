@@ -3,7 +3,7 @@ package com.example.flashlearn.ui.decklist
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.flashlearn.data.repository.DeckRepository
-import com.flashlearn.data.entity.Deck
+import com.flashlearn.data.dao.DeckWithCount
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -16,8 +16,8 @@ class DeckListViewModel @Inject constructor(
     private val deckRepository: DeckRepository
 ) : ViewModel() {
 
-    val decks: StateFlow<List<Deck>> = deckRepository
-        .observeAllDecks()
+    val decks: StateFlow<List<DeckWithCount>> = deckRepository
+        .observeAllDecksWithCount()
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
@@ -31,9 +31,9 @@ class DeckListViewModel @Inject constructor(
         }
     }
 
-    fun deleteDeck(deck: Deck) {
+    fun deleteDeck(deckId: Long) {
         viewModelScope.launch {
-            deckRepository.deleteDeck(deck)
+            deckRepository.deleteDeckById(deckId)
         }
     }
 }

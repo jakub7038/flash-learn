@@ -1,6 +1,7 @@
 package com.example.flashlearn.data.repository
 
 import com.flashlearn.data.dao.DeckDao
+import com.flashlearn.data.dao.DeckWithCount
 import com.flashlearn.data.entity.Deck
 import kotlinx.coroutines.flow.Flow
 import java.time.Instant
@@ -13,6 +14,8 @@ class DeckRepository @Inject constructor(
 ) {
     fun observeAllDecks(): Flow<List<Deck>> = deckDao.observeAll()
 
+    fun observeAllDecksWithCount(): Flow<List<DeckWithCount>> = deckDao.observeAllWithCount()
+
     suspend fun createDeck(title: String, description: String? = null): Long {
         val deck = Deck(
             title = title,
@@ -24,4 +27,6 @@ class DeckRepository @Inject constructor(
     }
 
     suspend fun deleteDeck(deck: Deck) = deckDao.delete(deck)
+
+    suspend fun deleteDeckById(id: Long) = deckDao.deleteById(id)
 }

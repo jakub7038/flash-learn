@@ -93,7 +93,9 @@ fun MainScreen(
         Box(modifier = Modifier.padding(paddingValues)) {
             when (selectedItem) {
                 BottomNavItem.Learn -> LearnScreen()
-                BottomNavItem.MyDecks -> DeckListScreen()
+                BottomNavItem.MyDecks -> DeckListScreen(
+                    onNavigateToCreateDeck = onNavigateToCreateDeck
+                )
                 BottomNavItem.Create -> CreateScreen(
                     onNavigateToCreateDeck = onNavigateToCreateDeck
                 )

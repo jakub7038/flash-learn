@@ -9,6 +9,14 @@ import androidx.room.Update
 import com.flashlearn.data.entity.Deck
 import kotlinx.coroutines.flow.Flow
 
+data class DeckWithCount(
+    val id: Long,
+    val title: String,
+    val description: String?,
+    val updatedAt: Long,
+    val flashcardCount: Int
+)
+
 /**
  * DAO (Data Access Object) dla encji [Deck].
  *
@@ -19,6 +27,18 @@ import kotlinx.coroutines.flow.Flow
 interface DeckDao {
 
     // ── Odczyt ───────────────────────────────────────────────────────────────
+
+    /**
+     * Obserwuje wszystkie talie posortowane od najnowszej, wraz z liczbą fiszek.
+     */
+    @Query("""
+        SELECT d.id, d.title, d.description, d.updated_at AS updatedAt, COUNT(f.id) AS flashcardCount
+        FROM decks d
+        LEFT JOIN flashcards f ON d.id = f.deck_id
+        GROUP BY d.id
+        ORDER BY d.created_at DESC
+    """)
+    fun observeAllWithCount(): Flow<List<DeckWithCount>>
 
     /**
      * Obserwuje wszystkie talie posortowane od najnowszej.
@@ -112,4 +132,8 @@ interface DeckDao {
     /** Usuwa wszystkie talie z bazy (przydatne w testach i przy wylogowaniu). */
     @Query("DELETE FROM decks")
     suspend fun deleteAll(): Int
+
+    /** Usuwa talię po ID. */
+    @Query("DELETE FROM decks WHERE id = :id")
+    suspend fun deleteById(id: Long): Int
 }
