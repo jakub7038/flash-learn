@@ -92,4 +92,18 @@ public class JwtService {
             return false;
         }
     }
+
+    /**
+     * Wyciąga datę wygaśnięcia z tokena JWT.
+     * @param token JWT token
+     * @return data wygaśnięcia tokena
+     */
+    public Date extractExpiration(String token) {
+        return Jwts.parser()
+                .verifyWith(signingKey)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload()
+                .getExpiration();
+    }
 }

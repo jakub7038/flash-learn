@@ -65,4 +65,14 @@ public class AuthController {
         loginReq.setPassword(testPassword);
         return ResponseEntity.ok(authService.login(loginReq));
     }
+
+    @Operation(summary = "Odświeżenie access tokena")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Zwraca nową parę tokenów"),
+            @ApiResponse(responseCode = "401", description = "Token nieważny lub wygasły")
+    })
+    @PostMapping("/refresh-token")
+    public ResponseEntity<RefreshTokenResponse> refresh(@Valid @RequestBody RefreshTokenRequest request) {
+        return ResponseEntity.ok(authService.refresh(request));
+    }
 }
