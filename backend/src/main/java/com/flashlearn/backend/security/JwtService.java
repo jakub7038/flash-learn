@@ -1,5 +1,6 @@
 package com.flashlearn.backend.security;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,6 +16,10 @@ import java.util.Date;
  */
 @Component
 public class JwtService {
+
+    public static final String TOKEN_TYPE_ACCESS  = "access";
+    public static final String TOKEN_TYPE_REFRESH = "refresh";
+    private static final String CLAIM_TYPE        = "type";
 
     private final SecretKey signingKey;
     private final long accessExpirationMs;
@@ -41,7 +46,7 @@ public class JwtService {
      * @return podpisany JWT access token
      */
     public String generateAccessToken(String email) {
-        return buildToken(email, accessExpirationMs);
+        return buildToken(email, accessExpirationMs, TOKEN_TYPE_ACCESS);
     }
 
     /**
@@ -50,15 +55,20 @@ public class JwtService {
      * @return podpisany JWT refresh token
      */
     public String generateRefreshToken(String email) {
-        return buildToken(email, refreshExpirationMs);
+        return buildToken(email, refreshExpirationMs, TOKEN_TYPE_REFRESH);
     }
 
     /**
-     * Buduje token JWT z podanym czasem wygaśnięcia.
+     * Buduje token JWT z podanym czasem wygaśnięcia i typem.
+     * @param subject     email użytkownika (subject tokena)
+     * @param expirationMs czas życia tokena w ms
+     * @param type        typ tokena: "access" lub "refresh"
+     * @return podpisany JWT token
      */
-    private String buildToken(String subject, long expirationMs) {
+    private String buildToken(String subject, long expirationMs, String type) {
         return Jwts.builder()
                 .subject(subject)
+                .claim(CLAIM_TYPE, type)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + expirationMs))
                 .signWith(signingKey)
@@ -71,12 +81,29 @@ public class JwtService {
      * @return email (subject) z tokena
      */
     public String extractEmail(String token) {
-        return Jwts.parser()
-                .verifyWith(signingKey)
-                .build()
-                .parseSignedClaims(token)
-                .getPayload()
-                .getSubject();
+        return extractClaims(token).getSubject();
+    }
+
+    /**
+     * Wyciąga datę wygaśnięcia z tokena JWT.
+     * @param token JWT token
+     * @return data wygaśnięcia tokena
+     */
+    public Date extractExpiration(String token) {
+        return extractClaims(token).getExpiration();
+    }
+
+    /**
+     * Sprawdza czy token jest typu refresh.
+     * @param token JWT token
+     * @return true jeśli token jest refresh tokenem
+     */
+    public boolean isRefreshToken(String token) {
+        try {
+            return TOKEN_TYPE_REFRESH.equals(extractClaims(token).get(CLAIM_TYPE, String.class));
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     /**
@@ -94,16 +121,15 @@ public class JwtService {
     }
 
     /**
-     * Wyciąga datę wygaśnięcia z tokena JWT.
+     * Wyciąga claims z tokena JWT.
      * @param token JWT token
-     * @return data wygaśnięcia tokena
+     * @return claims zawarte w tokenie
      */
-    public Date extractExpiration(String token) {
+    private Claims extractClaims(String token) {
         return Jwts.parser()
                 .verifyWith(signingKey)
                 .build()
                 .parseSignedClaims(token)
-                .getPayload()
-                .getExpiration();
+                .getPayload();
     }
 }
