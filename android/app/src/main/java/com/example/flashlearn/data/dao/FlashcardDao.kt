@@ -27,6 +27,10 @@ interface FlashcardDao {
     @Query("SELECT * FROM flashcards WHERE deck_id = :deckId ORDER BY created_at ASC")
     suspend fun getByDeck(deckId: Long): List<Flashcard>
 
+    /** Zwraca liczbę fiszek w danej talii. */
+    @Query("SELECT COUNT(*) FROM flashcards WHERE deck_id = :deckId")
+    fun observeCountByDeck(deckId: Long): Flow<Int>
+
     /** Zwraca fiszkę o podanym lokalnym id lub null. */
     @Query("SELECT * FROM flashcards WHERE id = :id LIMIT 1")
     suspend fun getById(id: Long): Flashcard?

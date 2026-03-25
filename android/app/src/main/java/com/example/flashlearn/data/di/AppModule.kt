@@ -5,7 +5,11 @@ import android.content.SharedPreferences
 import com.example.flashlearn.data.AuthRepositoryImpl
 import com.example.flashlearn.data.remote.AuthApiService
 import com.example.flashlearn.data.remote.RetrofitClient
+import com.example.flashlearn.data.repository.DeckRepository
 import com.example.flashlearn.domain.repository.AuthRepository
+import com.flashlearn.data.dao.DeckDao
+import com.flashlearn.data.dao.FlashcardDao
+import com.flashlearn.data.db.AppDatabase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -16,6 +20,23 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
+
+    @Provides
+    @Singleton
+    fun provideAppDatabase(@ApplicationContext context: Context): AppDatabase =
+        AppDatabase.getInstance(context)
+
+    @Provides
+    @Singleton
+    fun provideDeckDao(db: AppDatabase): DeckDao = db.deckDao()
+
+    @Provides
+    @Singleton
+    fun provideFlashcardDao(db: AppDatabase): FlashcardDao = db.flashcardDao()
+
+    @Provides
+    @Singleton
+    fun provideDeckRepository(deckDao: DeckDao): DeckRepository = DeckRepository(deckDao)
 
     @Provides
     @Singleton
