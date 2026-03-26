@@ -12,6 +12,7 @@ import androidx.navigation.navArgument
 import com.example.flashlearn.data.local.TokenManager
 import com.example.flashlearn.data.remote.RetrofitClient
 import com.example.flashlearn.ui.screens.DeckEditScreen
+import com.example.flashlearn.ui.screens.FlashcardEditScreen
 import com.example.flashlearn.ui.screens.LoginScreen
 import com.example.flashlearn.ui.screens.MainScreen
 import com.example.flashlearn.ui.screens.RegisterScreen
@@ -74,6 +75,26 @@ class MainActivity : ComponentActivity() {
                         val deckId = backStackEntry.arguments?.getLong("deckId") ?: return@composable
                         DeckEditScreen(
                             deckId = deckId,
+                            onNavigateBack = { navController.popBackStack() }
+                        )
+                    }
+                    composable(
+                        route = "flashcard/{deckId}/create",
+                        arguments = listOf(navArgument("deckId") { type = NavType.LongType })
+                    ) { backStackEntry ->
+                        val deckId = backStackEntry.arguments?.getLong("deckId") ?: return@composable
+                        FlashcardEditScreen(
+                            deckId = deckId,
+                            onNavigateBack = { navController.popBackStack() }
+                        )
+                    }
+                    composable(
+                        route = "flashcard/edit/{flashcardId}",
+                        arguments = listOf(navArgument("flashcardId") { type = NavType.LongType })
+                    ) { backStackEntry ->
+                        val flashcardId = backStackEntry.arguments?.getLong("flashcardId") ?: return@composable
+                        FlashcardEditScreen(
+                            flashcardId = flashcardId,
                             onNavigateBack = { navController.popBackStack() }
                         )
                     }

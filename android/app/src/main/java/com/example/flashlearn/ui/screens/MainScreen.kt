@@ -21,7 +21,7 @@ sealed class BottomNavItem(
 ) {
     object Learn : BottomNavItem("learn", "Nauka", Icons.Default.PlayArrow)
     object MyDecks : BottomNavItem("my_decks", "Moje talie", Icons.AutoMirrored.Filled.List)
-    object Create : BottomNavItem("create", "Utwórz", Icons.Default.Add)
+    object Create : BottomNavItem("create", "Dodaj", Icons.Default.Add)
     object Explore : BottomNavItem("explore", "Przeglądaj", Icons.Default.Search)
     object Profile : BottomNavItem("profile", "Profil", Icons.Default.Person)
 }
@@ -96,9 +96,7 @@ fun MainScreen(
                 BottomNavItem.MyDecks -> DeckListScreen(
                     onNavigateToCreateDeck = onNavigateToCreateDeck
                 )
-                BottomNavItem.Create -> CreateScreen(
-                    onNavigateToCreateDeck = onNavigateToCreateDeck
-                )
+                BottomNavItem.Create -> CreateScreen()
                 BottomNavItem.Explore -> MarketplaceScreen()
                 BottomNavItem.Profile -> DashboardScreen(onLogout = onLogout)
             }
