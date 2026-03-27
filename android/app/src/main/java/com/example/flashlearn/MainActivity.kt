@@ -13,6 +13,7 @@ import com.example.flashlearn.data.local.TokenManager
 import com.example.flashlearn.data.remote.RetrofitClient
 import com.example.flashlearn.ui.screens.DeckEditScreen
 import com.example.flashlearn.ui.screens.FlashcardEditScreen
+import com.example.flashlearn.ui.screens.FlashcardListScreen
 import com.example.flashlearn.ui.screens.LoginScreen
 import com.example.flashlearn.ui.screens.MainScreen
 import com.example.flashlearn.ui.screens.RegisterScreen
@@ -60,6 +61,9 @@ class MainActivity : ComponentActivity() {
                             },
                             onNavigateToCreateDeck = {
                                 navController.navigate("deck/create")
+                            },
+                            onNavigateToFlashcards = { deckId ->
+                                navController.navigate("deck/$deckId/flashcards")
                             }
                         )
                     }
@@ -76,6 +80,22 @@ class MainActivity : ComponentActivity() {
                         DeckEditScreen(
                             deckId = deckId,
                             onNavigateBack = { navController.popBackStack() }
+                        )
+                    }
+                    composable(
+                        route = "deck/{deckId}/flashcards",
+                        arguments = listOf(navArgument("deckId") { type = NavType.LongType })
+                    ) { backStackEntry ->
+                        val deckId = backStackEntry.arguments?.getLong("deckId") ?: return@composable
+                        FlashcardListScreen(
+                            deckId = deckId,
+                            onNavigateBack = { navController.popBackStack() },
+                            onNavigateToCreateFlashcard = {
+                                navController.navigate("flashcard/$deckId/create")
+                            },
+                            onNavigateToEditFlashcard = { flashcardId ->
+                                navController.navigate("flashcard/edit/$flashcardId")
+                            }
                         )
                     }
                     composable(

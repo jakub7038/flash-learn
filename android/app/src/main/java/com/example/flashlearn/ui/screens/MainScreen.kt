@@ -8,6 +8,7 @@ import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -29,10 +30,9 @@ sealed class BottomNavItem(
 @Composable
 fun MainScreen(
     onLogout: () -> Unit,
-    onNavigateToCreateDeck: () -> Unit = {}
+    onNavigateToCreateDeck: () -> Unit = {},
+    onNavigateToFlashcards: (deckId: Long) -> Unit = {}
 ) {
-    var selectedItem by remember { mutableStateOf<BottomNavItem>(BottomNavItem.Learn) }
-
     val items = listOf(
         BottomNavItem.Learn,
         BottomNavItem.MyDecks,
@@ -40,6 +40,9 @@ fun MainScreen(
         BottomNavItem.Explore,
         BottomNavItem.Profile
     )
+
+    var selectedIndex by rememberSaveable { mutableIntStateOf(0) }
+    val selectedItem = items[selectedIndex]
 
     Scaffold(
         bottomBar = {
@@ -63,7 +66,7 @@ fun MainScreen(
                                 if (isSelected) MaterialTheme.colorScheme.primaryContainer
                                 else MaterialTheme.colorScheme.surface
                             )
-                            .clickable { selectedItem = item }
+                            .clickable { selectedIndex = items.indexOf(item) }
                             .padding(vertical = 12.dp),
                         contentAlignment = Alignment.Center
                     ) {
@@ -94,7 +97,8 @@ fun MainScreen(
             when (selectedItem) {
                 BottomNavItem.Learn -> LearnScreen()
                 BottomNavItem.MyDecks -> DeckListScreen(
-                    onNavigateToCreateDeck = onNavigateToCreateDeck
+                    onNavigateToCreateDeck = onNavigateToCreateDeck,
+                    onNavigateToFlashcards = onNavigateToFlashcards
                 )
                 BottomNavItem.Create -> CreateScreen()
                 BottomNavItem.Explore -> MarketplaceScreen()

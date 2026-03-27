@@ -30,7 +30,8 @@ import java.util.*
 @Composable
 fun DeckListScreen(
     viewModel: DeckListViewModel = hiltViewModel(),
-    onNavigateToCreateDeck: () -> Unit = {}
+    onNavigateToCreateDeck: () -> Unit = {},
+    onNavigateToFlashcards: (deckId: Long) -> Unit = {}
 ) {
     val decks by viewModel.decks.collectAsState()
 
@@ -80,6 +81,7 @@ fun DeckListScreen(
                     items(decks, key = { it.id }) { deck ->
                         DeckCard(
                             deck = deck,
+                            onClick = { onNavigateToFlashcards(deck.id) },
                             onDelete = { viewModel.deleteDeck(deck.id) }
                         )
                     }
@@ -89,13 +91,14 @@ fun DeckListScreen(
     }
 }
 @Composable
-fun DeckCard(deck: DeckWithCount, onDelete: () -> Unit) {
+fun DeckCard(deck: DeckWithCount, onClick: () -> Unit = {}, onDelete: () -> Unit) {
     val dateFormatter = remember { SimpleDateFormat("dd MMM yyyy", Locale.getDefault()) }
     val lastModified = remember(deck.updatedAt) {
         dateFormatter.format(Date(deck.updatedAt * 1000L))
     }
 
     Card(
+        onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
