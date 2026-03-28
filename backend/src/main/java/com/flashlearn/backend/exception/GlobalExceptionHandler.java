@@ -1,6 +1,7 @@
 package com.flashlearn.backend.exception;
 
 import com.flashlearn.backend.auth.InvalidTokenException;
+import com.flashlearn.backend.exception.ResourceAccessDeniedException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -50,6 +51,15 @@ public class GlobalExceptionHandler {
             InvalidTokenException ex) {
 
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(Map.of("error", ex.getMessage()));
+    }
+
+    // Brak dostępu do cudzego zasobu → 403
+    @ExceptionHandler(ResourceAccessDeniedException.class)
+    public ResponseEntity<Map<String, String>> handleAccessDenied(
+            ResourceAccessDeniedException ex) {
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
                 .body(Map.of("error", ex.getMessage()));
     }
 }
