@@ -20,3 +20,7 @@ data class RegisterResponse(
     val email: String,
     val message: String
 )
+
+data class LogoutRequest(
+    val refreshToken: String
+)

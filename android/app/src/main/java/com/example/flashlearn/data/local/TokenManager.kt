@@ -9,6 +9,8 @@ object TokenManager {
     private const val PREFS_NAME = "flashlearn_auth"
     private const val KEY_ACCESS_TOKEN = "access_token"
     private const val KEY_REFRESH_TOKEN = "refresh_token"
+    private const val KEY_EMAIL = "email"
+    private const val KEY_REGISTERED_AT = "registered_at"
 
     private lateinit var prefs: SharedPreferences
 
@@ -36,6 +38,18 @@ object TokenManager {
     fun getAccessToken(): String? = prefs.getString(KEY_ACCESS_TOKEN, null)
 
     fun getRefreshToken(): String? = prefs.getString(KEY_REFRESH_TOKEN, null)
+
+    fun saveEmail(email: String) {
+        prefs.edit().putString(KEY_EMAIL, email).apply()
+    }
+
+    fun getEmail(): String? = prefs.getString(KEY_EMAIL, null)
+
+    fun saveRegisteredAt(isoDate: String) {
+        prefs.edit().putString(KEY_REGISTERED_AT, isoDate).apply()
+    }
+
+    fun getRegisteredAt(): String? = prefs.getString(KEY_REGISTERED_AT, null)
 
     fun clearTokens() {
         prefs.edit().clear().apply()

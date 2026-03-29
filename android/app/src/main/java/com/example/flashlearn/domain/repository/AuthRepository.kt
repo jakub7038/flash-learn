@@ -16,4 +16,12 @@ interface AuthRepository {
     fun clearTokens()
 
     fun getAccessToken(): String?
+
+    fun getRefreshToken(): String?
+
+    fun saveUserInfo(email: String, registeredAt: String)
+
+    fun getEmail(): String?
+
+    fun getRegisteredAt(): String?
 }
