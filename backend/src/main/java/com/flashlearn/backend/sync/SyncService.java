@@ -8,6 +8,9 @@ import com.flashlearn.backend.repository.DeckRepository;
 import com.flashlearn.backend.repository.FlashcardRepository;
 import com.flashlearn.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Serwis obsługujący synchronizację danych z urządzenia mobilnego do serwera.
@@ -70,6 +74,55 @@ public class SyncService {
         }
 
         return new SyncPushResponse(decksProcessed, flashcardsProcessed, conflicts, LocalDateTime.now());
+    }
+
+    /**
+     * Pobiera dane użytkownika zmienione po wskazanym timestamp.
+     * Wyniki są stronicowane.
+     *
+     * @param since    timestamp od którego pobieramy zmiany
+     * @param page     numer strony (0-based)
+     * @param pageSize liczba wyników na stronę
+     * @return dane zmienione po since wraz z metadanymi paginacji
+     */
+    @Transactional(readOnly = true)
+    public SyncPullResponse pull(LocalDateTime since, int page, int pageSize) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Pageable pageable = PageRequest.of(page, pageSize);
+
+        Page<Deck> deckPage = deckRepository.findByOwnerIdAndUpdatedAtAfter(user.getId(), since, pageable);
+        Page<Flashcard> flashcardPage = flashcardRepository.findByDeckOwnerIdAndUpdatedAtAfter(user.getId(), since, pageable);
+
+        long totalDecks = deckRepository.countByOwnerIdAndUpdatedAtAfter(user.getId(), since);
+        long totalFlashcards = flashcardRepository.countByDeckOwnerIdAndUpdatedAtAfter(user.getId(), since);
+
+        List<SyncDeckDTO> deckDTOs = deckPage.getContent().stream().map(deck -> {
+            SyncDeckDTO dto = new SyncDeckDTO();
+            dto.setId(deck.getId());
+            dto.setTitle(deck.getTitle());
+            dto.setDescription(deck.getDescription());
+            dto.setPublic(deck.isPublic());
+            dto.setUpdatedAt(deck.getUpdatedAt());
+            dto.setFlashcards(List.of());
+            return dto;
+        }).collect(Collectors.toList());
+
+        List<SyncFlashcardDTO> flashcardDTOs = flashcardPage.getContent().stream().map(f -> {
+            SyncFlashcardDTO dto = new SyncFlashcardDTO();
+            dto.setId(f.getId());
+            dto.setQuestion(f.getQuestion());
+            dto.setAnswer(f.getAnswer());
+            dto.setUpdatedAt(f.getUpdatedAt());
+            return dto;
+        }).collect(Collectors.toList());
+
+        boolean hasMore = deckPage.hasNext() || flashcardPage.hasNext();
+
+        return new SyncPullResponse(deckDTOs, flashcardDTOs, LocalDateTime.now(),
+                page, pageSize, totalDecks, totalFlashcards, hasMore);
     }
 
     /**
