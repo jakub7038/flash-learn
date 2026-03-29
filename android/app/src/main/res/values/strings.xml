@@ -112,6 +112,10 @@
     <string name="marketplace_title">Marketplace</string>
     <string name="marketplace_subtitle">Przeglądaj i pobieraj publiczne talie</string>
 
+    <!-- Offline / network banners -->
+    <string name="offline_banner_message">Brak połączenia z internetem</string>
+    <string name="reconnected_banner_message">Połączono. Synchronizacja w toku…</string>
+
     <!-- Bottom navigation -->
     <string name="nav_learn">Nauka</string>
     <string name="nav_my_decks">Moje talie</string>

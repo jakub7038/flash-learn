@@ -112,6 +112,10 @@
     <string name="marketplace_title">Marketplace</string>
     <string name="marketplace_subtitle">Browse and download public decks</string>
 
+    <!-- Offline / network banners -->
+    <string name="offline_banner_message">No internet connection</string>
+    <string name="reconnected_banner_message">Connected. Syncing…</string>
+
     <!-- Bottom navigation -->
     <string name="nav_learn">Learn</string>
     <string name="nav_my_decks">My decks</string>
