@@ -236,6 +236,24 @@ API_BASE_URL=http://TWOJE_IP:8080/
 
 4. Uruchom aplikację (Shift+F10)
 
+## Testy
+
+### Testy integracyjne backendu
+
+Testy używają bazy H2 in-memory — **nie wymagają uruchomionego Dockera ani PostgreSQL**.
+
+```bash
+cd backend
+./mvnw test
+```
+
+Uruchomienie wybranych klas:
+```bash
+./mvnw test -Dtest="AuthIntegrationTest,SyncIntegrationTest"
+```
+
+Wyniki w terminalu oraz w `backend/target/surefire-reports/`.
+
 ## Dokumentacja API
 
 ### Swagger UI
