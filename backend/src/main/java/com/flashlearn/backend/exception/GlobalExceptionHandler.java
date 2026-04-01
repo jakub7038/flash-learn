@@ -1,6 +1,7 @@
 package com.flashlearn.backend.exception;
 
 import com.flashlearn.backend.auth.InvalidTokenException;
+import com.flashlearn.backend.exception.DeckNotFoundException;
 import com.flashlearn.backend.exception.ResourceAccessDeniedException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -60,6 +61,15 @@ public class GlobalExceptionHandler {
             ResourceAccessDeniedException ex) {
 
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(Map.of("error", ex.getMessage()));
+    }
+
+    // Talia nie istnieje → 404
+    @ExceptionHandler(DeckNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleDeckNotFound(
+            DeckNotFoundException ex) {
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(Map.of("error", ex.getMessage()));
     }
 }
