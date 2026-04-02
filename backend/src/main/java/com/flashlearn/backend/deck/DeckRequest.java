@@ -18,5 +18,5 @@ public class DeckRequest {
     private String description;
 
     @JsonProperty("isPublic")
-    private Boolean isPublic = false;
+    private boolean isPublic = false;
 }

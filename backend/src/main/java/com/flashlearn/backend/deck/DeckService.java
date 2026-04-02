@@ -72,7 +72,7 @@ public class DeckService {
                 .owner(user)
                 .title(request.getTitle())
                 .description(request.getDescription())
-                .isPublic(request.getIsPublic())
+                .isPublic(request.isPublic())
                 .build();
 
         return toResponse(deckRepository.save(deck));
@@ -100,7 +100,7 @@ public class DeckService {
 
         deck.setTitle(request.getTitle());
         deck.setDescription(request.getDescription());
-        deck.setPublic(request.getIsPublic());
+        deck.setPublic(request.isPublic());
 
         return toResponse(deckRepository.save(deck));
     }
