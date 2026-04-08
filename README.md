@@ -236,6 +236,33 @@ API_BASE_URL=http://TWOJE_IP:8080/
 
 4. Uruchom aplikację (Shift+F10)
 
+## Walidacja i baza danych
+
+### Ograniczenia długości pól
+
+| Pole | Limit |
+|---|---|
+| Email | max 255 znaków, format RFC |
+| Hasło | min 8, max 128 znaków |
+| Tytuł talii | min 1, max 100 znaków |
+| Opis talii | max 500 znaków |
+| Pytanie fiszki | max 500 znaków |
+| Odpowiedź fiszki | max 500 znaków |
+
+Limity są egzekwowane jednocześnie po stronie frontendu (UI nie pozwala wpisać więcej) oraz backendu (`@Size` na DTO → 400 Bad Request). Kolumny w bazie PostgreSQL mają odpowiadające ograniczenia (`VARCHAR(n)`).
+
+### Sanityzacja danych wejściowych
+
+Wszystkie pola tekstowe z requestów JSON są automatycznie oczyszczane z tagów HTML przed zapisem do bazy. Sanityzacja działa globalnie na poziomie deserializacji Jacksona (`JacksonConfig`) — nie wymaga obsługi w każdym serwisie osobno. Zapobiega to atakom XSS przy wyświetlaniu danych w klientach webowych.
+
+### Migracje bazy danych (Flyway)
+
+| Migracja | Opis |
+|---|---|
+| `V1__init_schema.sql` | Inicjalny schemat (users, decks, flashcards, ...) |
+| `V2__add_revoked_tokens.sql` | Tabela blacklisty tokenów JWT |
+| `V3__add_column_length_constraints.sql` | Ograniczenia długości kolumn tekstowych |
+
 ## Testy
 
 ### Testy integracyjne backendu
