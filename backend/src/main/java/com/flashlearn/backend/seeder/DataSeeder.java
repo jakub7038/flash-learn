@@ -35,6 +35,7 @@ public class DataSeeder implements ApplicationRunner {
     public void run(ApplicationArguments args) {
         log.info("=== DataSeeder starting ===");
 
+        seedUser("test@test.com",         "test1234", karolDecks());
         seedUser("KarolWalicki@ur.pl",   "haslo123", karolDecks());
         seedUser("AnnaKowalska@ur.pl",   "haslo123", annaDecks());
         seedUser("PiotrNowak@ur.pl",     "haslo123", piotrDecks());
