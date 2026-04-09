@@ -9,6 +9,7 @@ import com.example.flashlearn.data.repository.DeckRepository
 import com.example.flashlearn.domain.repository.AuthRepository
 import com.flashlearn.data.dao.DeckDao
 import com.flashlearn.data.dao.FlashcardDao
+import com.flashlearn.data.dao.FlashcardProgressDao
 import com.flashlearn.data.db.AppDatabase
 import dagger.Module
 import dagger.Provides
@@ -33,6 +34,11 @@ object AppModule {
     @Provides
     @Singleton
     fun provideFlashcardDao(db: AppDatabase): FlashcardDao = db.flashcardDao()
+
+    @Provides
+    @Singleton
+    fun provideFlashcardProgressDao(db: AppDatabase): FlashcardProgressDao =
+        db.flashcardProgressDao()
 
     @Provides
     @Singleton

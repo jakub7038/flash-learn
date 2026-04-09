@@ -4,10 +4,14 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.flashlearn.data.dao.DeckDao
 import com.flashlearn.data.dao.FlashcardDao
+import com.flashlearn.data.dao.FlashcardProgressDao
 import com.flashlearn.data.entity.Deck
 import com.flashlearn.data.entity.Flashcard
+import com.flashlearn.data.entity.FlashcardProgress
 
 /**
  * Główna baza danych Room aplikacji FlashLearn.
@@ -29,18 +33,47 @@ import com.flashlearn.data.entity.Flashcard
  * [getInstance].
  */
 @Database(
-    entities = [Deck::class, Flashcard::class],
-    version = 1,
+    entities = [Deck::class, Flashcard::class, FlashcardProgress::class],
+    version = 2,
     exportSchema = true,          // generuje JSON schema do kontroli wersji
 )
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun deckDao(): DeckDao
     abstract fun flashcardDao(): FlashcardDao
+    abstract fun flashcardProgressDao(): FlashcardProgressDao
 
     companion object {
 
         private const val DB_NAME = "flashlearn.db"
+
+        /**
+         * Migracja 1→2: dodaje tabelę `flashcard_progress` przechowującą
+         * stan algorytmu SM-2 dla każdej fiszki.
+         */
+        val MIGRATION_1_2 = object : Migration(1, 2) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS `flashcard_progress` (
+                        `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        `flashcard_id` INTEGER NOT NULL,
+                        `ease_factor` REAL NOT NULL,
+                        `interval_days` INTEGER NOT NULL,
+                        `repetitions` INTEGER NOT NULL,
+                        `next_review_date` INTEGER NOT NULL,
+                        FOREIGN KEY(`flashcard_id`) REFERENCES `flashcards`(`id`)
+                            ON DELETE CASCADE
+                    )
+                    """.trimIndent()
+                )
+                db.execSQL(
+                    "CREATE UNIQUE INDEX IF NOT EXISTS " +
+                    "`index_flashcard_progress_flashcard_id` " +
+                    "ON `flashcard_progress` (`flashcard_id`)"
+                )
+            }
+        }
 
         @Volatile
         private var INSTANCE: AppDatabase? = null
@@ -63,8 +96,7 @@ abstract class AppDatabase : RoomDatabase() {
                 AppDatabase::class.java,
                 DB_NAME,
             )
-                // Tutaj dodawać kolejne migracje:
-                // .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
+                .addMigrations(MIGRATION_1_2)
                 .build()
 
         /**

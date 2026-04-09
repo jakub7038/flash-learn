@@ -21,6 +21,10 @@ class LoginUseCaseTest {
         override fun saveTokens(accessToken: String, refreshToken: String) {}
         override fun clearTokens() {}
         override fun getAccessToken(): String? = null
+        override fun getRefreshToken(): String? = null
+        override fun saveUserInfo(email: String, registeredAt: String) {}
+        override fun getEmail(): String? = null
+        override fun getRegisteredAt(): String? = null
     }
 
     private val loginUseCase = LoginUseCase(fakeRepository)
