@@ -100,8 +100,7 @@ fun FlashcardListScreen(
         if (flashcards.isEmpty()) {
             Box(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
+                    .fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
                 EmptyFlashcardsState(onAddClick = onNavigateToCreateFlashcard)
