@@ -39,7 +39,7 @@ class MainActivity : ComponentActivity() {
                         LoginScreen(
                             onLoginSuccess = {
                                 navController.navigate("main") {
-                                    popUpTo("login") { inclusive = true }
+                                    popUpTo(0)
                                 }
                             },
                             onNavigateToRegister = { navController.navigate("register") }
@@ -47,8 +47,12 @@ class MainActivity : ComponentActivity() {
                     }
                     composable("register") {
                         RegisterScreen(
-                            onRegisterSuccess = { navController.navigate("login") },
-                            onNavigateToLogin = { navController.navigate("login") }
+                            onRegisterSuccess = { 
+                                navController.navigate("login") {
+                                    popUpTo(0)
+                                } 
+                            },
+                            onNavigateToLogin = { navController.popBackStack() }
                         )
                     }
                     composable("main") {
@@ -56,7 +60,7 @@ class MainActivity : ComponentActivity() {
                             onLogout = {
                                 TokenManager.clearTokens()
                                 navController.navigate("login") {
-                                    popUpTo("main") { inclusive = true }
+                                    popUpTo(0)
                                 }
                             },
                             onNavigateToCreateDeck = {

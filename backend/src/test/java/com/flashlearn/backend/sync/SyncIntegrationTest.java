@@ -302,4 +302,108 @@ class SyncIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.totalDecks").value(0));
     }
+
+    // ── walidacja rozmiarów ───────────────────────────────────────────────────
+
+    @Test
+    void push_deckTitleTooLong_returns400() throws Exception {
+        SyncDeckDTO deck = new SyncDeckDTO();
+        deck.setTitle("A".repeat(101));
+        deck.setUpdatedAt(LocalDateTime.now());
+
+        SyncPushRequest req = buildPushRequest(List.of(deck), List.of());
+        mockMvc.perform(post("/sync/push")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void push_deckDescriptionTooLong_returns400() throws Exception {
+        SyncDeckDTO deck = newDeck("Valid Title");
+        deck.setDescription("D".repeat(501));
+
+        SyncPushRequest req = buildPushRequest(List.of(deck), List.of());
+        mockMvc.perform(post("/sync/push")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void push_flashcardQuestionTooLong_returns400() throws Exception {
+        SyncFlashcardDTO flashcard = new SyncFlashcardDTO();
+        flashcard.setQuestion("Q".repeat(501));
+        flashcard.setAnswer("A");
+        flashcard.setUpdatedAt(LocalDateTime.now());
+
+        SyncPushRequest req = buildPushRequest(List.of(), List.of(flashcard));
+        mockMvc.perform(post("/sync/push")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isBadRequest());
+    }
+
+    // ── sanityzacja HTML ──────────────────────────────────────────────────────
+
+    @Test
+    void push_htmlInDeckTitle_isSanitized() throws Exception {
+        SyncDeckDTO deck = newDeck("<b>Bold</b>");
+
+        SyncPushRequest req = buildPushRequest(List.of(deck), List.of());
+        mockMvc.perform(post("/sync/push")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isOk());
+
+        // pull and verify HTML was stripped
+        mockMvc.perform(get("/sync/pull")
+                        .param("since", "2000-01-01T00:00:00")
+                        .header("Authorization", "Bearer " + accessToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.decks[0].title").value("Bold"));
+    }
+
+    @Test
+    void push_scriptTagInFlashcard_isSanitized() throws Exception {
+        SyncDeckDTO deck = newDeck("Deck");
+        SyncPushRequest deckReq = buildPushRequest(List.of(deck), List.of());
+        mockMvc.perform(post("/sync/push")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .content(objectMapper.writeValueAsString(deckReq)))
+                .andExpect(status().isOk());
+
+        // get deck id
+        MvcResult pullResult = mockMvc.perform(get("/sync/pull")
+                        .param("since", "2000-01-01T00:00:00")
+                        .header("Authorization", "Bearer " + accessToken))
+                .andReturn();
+        Long deckId = objectMapper.readValue(
+                pullResult.getResponse().getContentAsString(), SyncPullResponse.class)
+                .getDecks().get(0).getId();
+
+        // push flashcard via /decks endpoint to get an id
+        String flashcardBody = """
+                {"question":"<script>alert('xss')</script>What?","answer":"<i>Answer</i>"}
+                """;
+        MvcResult fcResult = mockMvc.perform(post("/decks/{id}/flashcards", deckId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .content(flashcardBody))
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        String question = objectMapper.readTree(fcResult.getResponse().getContentAsString())
+                .get("question").asText();
+        String answer = objectMapper.readTree(fcResult.getResponse().getContentAsString())
+                .get("answer").asText();
+
+        assert !question.contains("<script>") : "script tag should be stripped";
+        assert !answer.contains("<i>") : "HTML tags should be stripped";
+    }
 }
