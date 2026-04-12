@@ -43,7 +43,7 @@ sealed class BottomNavItem(
 fun MainScreen(
     onLogout: () -> Unit,
     onNavigateToCreateDeck: () -> Unit = {},
-    onNavigateToFlashcards: (deckId: Long) -> Unit = {},
+    onNavigateToDeckDetail: (deckId: Long) -> Unit = {},
     networkViewModel: NetworkViewModel = hiltViewModel()
 ) {
     val items = listOf(
@@ -142,7 +142,7 @@ fun MainScreen(
                     BottomNavItem.Learn -> LearnScreen()
                     BottomNavItem.MyDecks -> DeckListScreen(
                         onNavigateToCreateDeck = onNavigateToCreateDeck,
-                        onNavigateToFlashcards = onNavigateToFlashcards
+                        onNavigateToDeckDetail = onNavigateToDeckDetail
                     )
                     BottomNavItem.Create -> CreateScreen()
                     BottomNavItem.Explore -> MarketplaceScreen()

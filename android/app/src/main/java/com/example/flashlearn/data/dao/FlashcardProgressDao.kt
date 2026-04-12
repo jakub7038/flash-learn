@@ -48,6 +48,18 @@ interface FlashcardProgressDao {
     )
     fun observeDueCount(deckId: Long, todayEpochDay: Long): Flow<Int>
 
+    /**
+     * Obserwuje wszystkie postępy dla danej talii, używane m.in. do obliczania statystyk (np. % opanowania).
+     */
+    @Query(
+        """
+        SELECT fp.* FROM flashcard_progress fp
+        INNER JOIN flashcards f ON f.id = fp.flashcard_id
+        WHERE f.deck_id = :deckId
+        """
+    )
+    fun observeProgressByDeck(deckId: Long): Flow<List<FlashcardProgress>>
+
     // ── Zapis ────────────────────────────────────────────────────────────────
 
     /**
