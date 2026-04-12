@@ -33,7 +33,7 @@ import java.util.*
 fun DeckListScreen(
     viewModel: DeckListViewModel = hiltViewModel(),
     onNavigateToCreateDeck: () -> Unit = {},
-    onNavigateToFlashcards: (deckId: Long) -> Unit = {}
+    onNavigateToDeckDetail: (deckId: Long) -> Unit = {}
 ) {
     val decks by viewModel.decks.collectAsState()
 
@@ -83,7 +83,7 @@ fun DeckListScreen(
                     items(decks, key = { it.id }) { deck ->
                         DeckCard(
                             deck = deck,
-                            onClick = { onNavigateToFlashcards(deck.id) },
+                            onClick = { onNavigateToDeckDetail(deck.id) },
                             onDelete = { viewModel.deleteDeck(deck.id) }
                         )
                     }

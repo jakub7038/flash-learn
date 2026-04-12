@@ -11,6 +11,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.flashlearn.data.local.TokenManager
 import com.example.flashlearn.data.remote.RetrofitClient
+import com.example.flashlearn.ui.screens.DeckDetailScreen
 import com.example.flashlearn.ui.screens.DeckEditScreen
 import com.example.flashlearn.ui.screens.FlashcardEditScreen
 import com.example.flashlearn.ui.screens.FlashcardListScreen
@@ -66,8 +67,8 @@ class MainActivity : ComponentActivity() {
                             onNavigateToCreateDeck = {
                                 navController.navigate("deck/create")
                             },
-                            onNavigateToFlashcards = { deckId ->
-                                navController.navigate("deck/$deckId/flashcards")
+                            onNavigateToDeckDetail = { deckId ->
+                                navController.navigate("deck/$deckId/detail")
                             }
                         )
                     }
@@ -84,6 +85,18 @@ class MainActivity : ComponentActivity() {
                         DeckEditScreen(
                             deckId = deckId,
                             onNavigateBack = { navController.popBackStack() }
+                        )
+                    }
+                    composable(
+                        route = "deck/{deckId}/detail",
+                        arguments = listOf(navArgument("deckId") { type = NavType.LongType })
+                    ) { backStackEntry ->
+                        val deckId = backStackEntry.arguments?.getLong("deckId") ?: return@composable
+                        DeckDetailScreen(
+                            deckId = deckId,
+                            onNavigateBack = { navController.popBackStack() },
+                            onNavigateToLearn = { /* docelowo: navController.navigate("learn/$deckId") */ },
+                            onNavigateToFlashcards = { id -> navController.navigate("deck/$id/flashcards") }
                         )
                     }
                     composable(
