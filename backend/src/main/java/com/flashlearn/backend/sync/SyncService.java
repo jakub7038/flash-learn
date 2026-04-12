@@ -23,9 +23,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * Serwis obsługujący synchronizację danych z urządzenia mobilnego do serwera.
- * Strategia rozwiązywania konfliktów: server-wins — dane serwera mają priorytet
- * gdy obie strony zmodyfikowały ten sam rekord.
+ * Serwis obslugujacy synchronizacje danych z urzadzenia mobilnego do serwera.
+ * Strategia rozwiazywania konfliktow: last-write-wins - wygrywa strona z nowszym updatedAt.
  */
 @Service
 @RequiredArgsConstructor
@@ -36,12 +35,12 @@ public class SyncService {
     private final UserRepository userRepository;
 
     /**
-     * Przetwarza zmiany przesłane z urządzenia mobilnego.
-     * Dla każdej talii i fiszki stosuje strategię server-wins przy konflikcie.
+     * Przetwarza zmiany przyslane z urzadzenia mobilnego.
+     * Dla kazdej talii i fiszki stosuje strategie last-write-wins przy konflikcie.
      *
-     * @param request lista zmian z urządzenia wraz z timestamp klienta
-     * @return podsumowanie przetworzonych zmian i lista konfliktów
-     * @throws ResourceAccessDeniedException gdy użytkownik próbuje modyfikować cudze zasoby
+     * @param request lista zmian z urzadzenia wraz z timestamp klienta
+     * @return podsumowanie przetworzonych zmian i lista konfliktow
+     * @throws ResourceAccessDeniedException gdy uzytkownik probuje modyfikowac cudze zasoby
      */
     @Transactional
     public SyncPushResponse push(SyncPushRequest request) {
@@ -81,12 +80,12 @@ public class SyncService {
     }
 
     /**
-     * Pobiera dane użytkownika zmienione po wskazanym timestamp.
-     * Wyniki są stronicowane.
+     * Pobiera dane uzytkownika zmienione po wskazanym timestamp.
+     * Wyniki sa stronicowane.
      *
-     * @param since    timestamp od którego pobieramy zmiany
+     * @param since    timestamp od ktorego pobieramy zmiany
      * @param page     numer strony (0-based)
-     * @param pageSize liczba wyników na stronę
+     * @param pageSize liczba wynikow na strone
      * @return dane zmienione po since wraz z metadanymi paginacji
      */
     @Transactional(readOnly = true)
@@ -130,14 +129,15 @@ public class SyncService {
     }
 
     /**
-     * Przetwarza pojedynczą talię — tworzy nową lub aktualizuje istniejącą.
-     * Przy konflikcie (obie strony edytowały) wygrywa serwer.
+     * Przetwarza pojedyncza talie - tworzy nowa lub aktualizuje istniejaca.
+     * Przy konflikcie stosowana jest strategia last-write-wins: wygrywa strona z nowszym updatedAt.
      *
-     * @param dto             dane talii z urządzenia
-     * @param owner           zalogowany użytkownik
+     * @param dto             dane talii z urzadzenia
+     * @param owner           zalogowany uzytkownik
      * @param clientTimestamp timestamp ostatniej synchronizacji klienta
-     * @return opis konfliktu lub null jeśli brak konfliktu
-     * @throws ResourceAccessDeniedException gdy talia należy do innego użytkownika
+     * @param deckIdMapping   mapa lokalnych id na id serwera
+     * @return opis konfliktu lub null jesli brak konfliktu
+     * @throws ResourceAccessDeniedException gdy talia nalezy do innego uzytkownika
      */
     private String processDeck(SyncDeckDTO dto, User owner, LocalDateTime clientTimestamp, Map<Long, Long> deckIdMapping) {
         if (dto.getId() == null) {
@@ -164,7 +164,14 @@ public class SyncService {
 
             if (existing.getUpdatedAt() != null &&
                     existing.getUpdatedAt().isAfter(clientTimestamp)) {
-                // Konflikt — serwer był edytowany po ostatnim sync klienta — server-wins
+                // Konflikt — serwer był edytowany po ostatnim sync klienta — last-write-wins
+                if (dto.getUpdatedAt() != null && dto.getUpdatedAt().isAfter(existing.getUpdatedAt())) {
+                    existing.setTitle(dto.getTitle());
+                    existing.setDescription(dto.getDescription());
+                    existing.setPublic(dto.isPublic());
+                    deckRepository.save(existing);
+                    return "Deck conflict (client-wins): id=" + dto.getId();
+                }
                 return "Deck conflict (server-wins): id=" + dto.getId();
             }
 
@@ -178,14 +185,15 @@ public class SyncService {
     }
 
     /**
-     * Przetwarza pojedynczą fiszkę — tworzy nową lub aktualizuje istniejącą.
-     * Przy konflikcie wygrywa serwer.
+     * Przetwarza pojedyncza fiszke - tworzy nowa lub aktualizuje istniejaca.
+     * Przy konflikcie stosowana jest strategia last-write-wins: wygrywa strona z nowszym updatedAt.
      *
-     * @param dto             dane fiszki z urządzenia
-     * @param owner           zalogowany użytkownik
-     * @param clientTimestamp timestamp ostatniej synchronizacji klienta
-     * @return opis konfliktu lub null jeśli brak konfliktu
-     * @throws ResourceAccessDeniedException gdy fiszka należy do talii innego użytkownika
+     * @param dto                  dane fiszki z urzadzenia
+     * @param owner                zalogowany uzytkownik
+     * @param clientTimestamp      timestamp ostatniej synchronizacji klienta
+     * @param flashcardIdMapping   mapa lokalnych id na id serwera
+     * @return opis konfliktu lub null jesli brak konfliktu
+     * @throws ResourceAccessDeniedException gdy fiszka nalezy do talii innego uzytkownika
      */
     private String processFlashcard(SyncFlashcardDTO dto, User owner, LocalDateTime clientTimestamp, Map<Long, Long> flashcardIdMapping) {
         if (dto.getId() == null) {
@@ -217,7 +225,13 @@ public class SyncService {
 
             if (existing.getUpdatedAt() != null &&
                     existing.getUpdatedAt().isAfter(clientTimestamp)) {
-                // Konflikt — server-wins
+                // Konflikt — last-write-wins
+                if (dto.getUpdatedAt() != null && dto.getUpdatedAt().isAfter(existing.getUpdatedAt())) {
+                    existing.setQuestion(dto.getQuestion());
+                    existing.setAnswer(dto.getAnswer());
+                    flashcardRepository.save(existing);
+                    return "Flashcard conflict (client-wins): id=" + dto.getId();
+                }
                 return "Flashcard conflict (server-wins): id=" + dto.getId();
             }
 

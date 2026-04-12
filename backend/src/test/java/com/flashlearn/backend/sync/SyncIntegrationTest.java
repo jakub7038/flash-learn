@@ -303,6 +303,92 @@ class SyncIntegrationTest {
                 .andExpect(jsonPath("$.totalDecks").value(0));
     }
 
+    // ── last-write-wins ───────────────────────────────────────────────────────
+
+    @Test
+    void push_conflict_clientNewerThanServer_clientWins() throws Exception {
+        SyncPushRequest createReq = buildPushRequest(List.of(newDeck("Original")), List.of());
+        mockMvc.perform(post("/sync/push")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .content(objectMapper.writeValueAsString(createReq)))
+                .andExpect(status().isOk());
+
+        MvcResult pullResult = mockMvc.perform(get("/sync/pull")
+                        .param("since", "2000-01-01T00:00:00")
+                        .header("Authorization", "Bearer " + accessToken))
+                .andReturn();
+        Long deckId = objectMapper.readValue(
+                pullResult.getResponse().getContentAsString(), SyncPullResponse.class)
+                .getDecks().get(0).getId();
+
+        // klient edytował później niż serwer → client-wins
+        SyncDeckDTO update = newDeck("Client Version");
+        update.setId(deckId);
+        update.setUpdatedAt(LocalDateTime.now().plusSeconds(5));
+
+        SyncPushRequest conflictReq = new SyncPushRequest();
+        conflictReq.setClientTimestamp(LocalDateTime.now().minusMinutes(10));
+        conflictReq.setDecks(List.of(update));
+        conflictReq.setFlashcards(List.of());
+
+        mockMvc.perform(post("/sync/push")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .content(objectMapper.writeValueAsString(conflictReq)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.conflicts[0]").value(
+                        org.hamcrest.Matchers.containsString("client-wins")));
+
+        mockMvc.perform(get("/sync/pull")
+                        .param("since", "2000-01-01T00:00:00")
+                        .header("Authorization", "Bearer " + accessToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.decks[0].title").value("Client Version"));
+    }
+
+    @Test
+    void push_conflict_serverNewerThanClient_serverWins() throws Exception {
+        SyncPushRequest createReq = buildPushRequest(List.of(newDeck("Server Version")), List.of());
+        mockMvc.perform(post("/sync/push")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .content(objectMapper.writeValueAsString(createReq)))
+                .andExpect(status().isOk());
+
+        MvcResult pullResult = mockMvc.perform(get("/sync/pull")
+                        .param("since", "2000-01-01T00:00:00")
+                        .header("Authorization", "Bearer " + accessToken))
+                .andReturn();
+        Long deckId = objectMapper.readValue(
+                pullResult.getResponse().getContentAsString(), SyncPullResponse.class)
+                .getDecks().get(0).getId();
+
+        // klient edytował wcześniej niż serwer → server-wins
+        SyncDeckDTO update = newDeck("Client Old Version");
+        update.setId(deckId);
+        update.setUpdatedAt(LocalDateTime.now().minusMinutes(20));
+
+        SyncPushRequest conflictReq = new SyncPushRequest();
+        conflictReq.setClientTimestamp(LocalDateTime.now().minusMinutes(10));
+        conflictReq.setDecks(List.of(update));
+        conflictReq.setFlashcards(List.of());
+
+        mockMvc.perform(post("/sync/push")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .content(objectMapper.writeValueAsString(conflictReq)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.conflicts[0]").value(
+                        org.hamcrest.Matchers.containsString("server-wins")));
+
+        mockMvc.perform(get("/sync/pull")
+                        .param("since", "2000-01-01T00:00:00")
+                        .header("Authorization", "Bearer " + accessToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.decks[0].title").value("Server Version"));
+    }
+
     // ── walidacja rozmiarów ───────────────────────────────────────────────────
 
     @Test
