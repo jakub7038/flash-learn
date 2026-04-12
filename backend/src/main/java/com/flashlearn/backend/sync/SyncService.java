@@ -164,7 +164,14 @@ public class SyncService {
 
             if (existing.getUpdatedAt() != null &&
                     existing.getUpdatedAt().isAfter(clientTimestamp)) {
-                // Konflikt — serwer był edytowany po ostatnim sync klienta — server-wins
+                // Konflikt — serwer był edytowany po ostatnim sync klienta — last-write-wins
+                if (dto.getUpdatedAt() != null && dto.getUpdatedAt().isAfter(existing.getUpdatedAt())) {
+                    existing.setTitle(dto.getTitle());
+                    existing.setDescription(dto.getDescription());
+                    existing.setPublic(dto.isPublic());
+                    deckRepository.save(existing);
+                    return "Deck conflict (client-wins): id=" + dto.getId();
+                }
                 return "Deck conflict (server-wins): id=" + dto.getId();
             }
 
@@ -217,7 +224,13 @@ public class SyncService {
 
             if (existing.getUpdatedAt() != null &&
                     existing.getUpdatedAt().isAfter(clientTimestamp)) {
-                // Konflikt — server-wins
+                // Konflikt — last-write-wins
+                if (dto.getUpdatedAt() != null && dto.getUpdatedAt().isAfter(existing.getUpdatedAt())) {
+                    existing.setQuestion(dto.getQuestion());
+                    existing.setAnswer(dto.getAnswer());
+                    flashcardRepository.save(existing);
+                    return "Flashcard conflict (client-wins): id=" + dto.getId();
+                }
                 return "Flashcard conflict (server-wins): id=" + dto.getId();
             }
 
