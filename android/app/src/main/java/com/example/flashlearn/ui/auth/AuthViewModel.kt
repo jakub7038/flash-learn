@@ -31,6 +31,15 @@ class AuthViewModel @Inject constructor(
             loginUseCase(email, password).fold(
                 onSuccess = { response ->
                     repository.saveTokens(response.accessToken, response.refreshToken)
+                    
+                    val constraints = androidx.work.Constraints.Builder()
+                        .setRequiredNetworkType(androidx.work.NetworkType.CONNECTED)
+                        .build()
+                    val syncRequest = androidx.work.OneTimeWorkRequestBuilder<com.example.flashlearn.sync.SyncWorker>()
+                        .setConstraints(constraints)
+                        .build()
+                    androidx.work.WorkManager.getInstance(getApplication()).enqueue(syncRequest)
+
                     _uiState.value = AuthUiState.Success
                 },
                 onFailure = { error ->

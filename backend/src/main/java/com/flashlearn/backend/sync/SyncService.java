@@ -17,7 +17,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -48,13 +50,15 @@ public class SyncService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         List<String> conflicts = new ArrayList<>();
+        Map<Long, Long> deckIdMapping = new HashMap<>();
+        Map<Long, Long> flashcardIdMapping = new HashMap<>();
         int decksProcessed = 0;
         int flashcardsProcessed = 0;
 
         // Przetwarzanie talii
         if (request.getDecks() != null) {
             for (SyncDeckDTO dto : request.getDecks()) {
-                String conflict = processDeck(dto, user, request.getClientTimestamp());
+                String conflict = processDeck(dto, user, request.getClientTimestamp(), deckIdMapping);
                 if (conflict != null) {
                     conflicts.add(conflict);
                 }
@@ -65,7 +69,7 @@ public class SyncService {
         // Przetwarzanie fiszek
         if (request.getFlashcards() != null) {
             for (SyncFlashcardDTO dto : request.getFlashcards()) {
-                String conflict = processFlashcard(dto, user, request.getClientTimestamp());
+                String conflict = processFlashcard(dto, user, request.getClientTimestamp(), flashcardIdMapping);
                 if (conflict != null) {
                     conflicts.add(conflict);
                 }
@@ -73,7 +77,7 @@ public class SyncService {
             }
         }
 
-        return new SyncPushResponse(decksProcessed, flashcardsProcessed, conflicts, LocalDateTime.now());
+        return new SyncPushResponse(decksProcessed, flashcardsProcessed, conflicts, deckIdMapping, flashcardIdMapping, LocalDateTime.now());
     }
 
     /**
@@ -135,7 +139,7 @@ public class SyncService {
      * @return opis konfliktu lub null jeśli brak konfliktu
      * @throws ResourceAccessDeniedException gdy talia należy do innego użytkownika
      */
-    private String processDeck(SyncDeckDTO dto, User owner, LocalDateTime clientTimestamp) {
+    private String processDeck(SyncDeckDTO dto, User owner, LocalDateTime clientTimestamp, Map<Long, Long> deckIdMapping) {
         if (dto.getId() == null) {
             // Nowa talia — zapisz
             Deck deck = Deck.builder()
@@ -144,7 +148,10 @@ public class SyncService {
                     .description(dto.getDescription())
                     .isPublic(dto.isPublic())
                     .build();
-            deckRepository.save(deck);
+            deck = deckRepository.save(deck);
+            if (dto.getLocalId() != null) {
+                deckIdMapping.put(dto.getLocalId(), deck.getId());
+            }
             return null;
         }
 
@@ -180,9 +187,25 @@ public class SyncService {
      * @return opis konfliktu lub null jeśli brak konfliktu
      * @throws ResourceAccessDeniedException gdy fiszka należy do talii innego użytkownika
      */
-    private String processFlashcard(SyncFlashcardDTO dto, User owner, LocalDateTime clientTimestamp) {
+    private String processFlashcard(SyncFlashcardDTO dto, User owner, LocalDateTime clientTimestamp, Map<Long, Long> flashcardIdMapping) {
         if (dto.getId() == null) {
-            // Nowa fiszka bez powiązanej talii — pomijamy (talia musi być najpierw zsynchronizowana)
+            // Nowa fiszka
+            if (dto.getDeckId() == null) {
+                return "Flashcard conflict: missing deckId for new flashcard";
+            }
+            Deck deck = deckRepository.findById(dto.getDeckId()).orElse(null);
+            if (deck == null || !deck.getOwner().getId().equals(owner.getId())) {
+                return "Flashcard conflict: deck not found or access denied for deckId=" + dto.getDeckId();
+            }
+            Flashcard flashcard = Flashcard.builder()
+                    .deck(deck)
+                    .question(dto.getQuestion())
+                    .answer(dto.getAnswer())
+                    .build();
+            flashcard = flashcardRepository.save(flashcard);
+            if (dto.getLocalId() != null) {
+                flashcardIdMapping.put(dto.getLocalId(), flashcard.getId());
+            }
             return null;
         }
 

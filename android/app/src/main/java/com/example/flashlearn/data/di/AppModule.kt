@@ -46,6 +46,12 @@ object AppModule {
 
     @Provides
     @Singleton
+    fun provideSyncApiService(): com.example.flashlearn.data.remote.SyncApiService {
+        return RetrofitClient.syncApi
+    }
+
+    @Provides
+    @Singleton
     fun provideSharedPreferences(
         @ApplicationContext context: Context
     ): SharedPreferences {

@@ -35,6 +35,10 @@ interface FlashcardDao {
     @Query("SELECT * FROM flashcards WHERE id = :id LIMIT 1")
     suspend fun getById(id: Long): Flashcard?
 
+    /** Zwraca fiszkę powiązaną z identyfikatorem serwera lub null. */
+    @Query("SELECT * FROM flashcards WHERE server_id = :serverId LIMIT 1")
+    suspend fun getByServerId(serverId: Long): Flashcard?
+
     /** Zwraca fiszki oczekujące na synchronizację z serwerem. */
     @Query("SELECT * FROM flashcards WHERE needs_sync = 1")
     suspend fun getPendingSync(): List<Flashcard>

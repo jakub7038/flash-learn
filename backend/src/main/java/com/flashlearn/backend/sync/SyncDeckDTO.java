@@ -15,6 +15,8 @@ public class SyncDeckDTO {
 
     private Long id; // null jeśli nowa talia
 
+    private Long localId; // id używane lokalnie w aplikacji do mapowania
+
     @NotBlank(message = "Title is required")
     @Size(max = 100, message = "Title must not exceed 100 characters")
     private String title;

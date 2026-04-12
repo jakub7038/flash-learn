@@ -14,6 +14,10 @@ public class SyncFlashcardDTO {
 
     private Long id; // null jeśli nowa fiszka
 
+    private Long localId; // id używane lokalnie w aplikacji
+
+    private Long deckId; // id talii nadrzędnej (z serwera)
+
     @NotBlank(message = "Question is required")
     @Size(max = 500, message = "Question must not exceed 500 characters")
     private String question;
