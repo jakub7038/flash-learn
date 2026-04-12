@@ -236,6 +236,14 @@ API_BASE_URL=http://TWOJE_IP:8080/
 
 4. Uruchom aplikację (Shift+F10)
 
+## Seeder (dane testowe)
+
+Dodaj do `docker/.env`:
+```properties
+SPRING_PROFILES_ACTIVE=dev
+```
+Zrestartuj (`docker-compose up --build`), a po starcie usuń tę linię i zrestartuj ponownie.
+
 ## Walidacja i baza danych
 
 ### Ograniczenia długości pól
