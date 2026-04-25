@@ -4,6 +4,7 @@ val LightTokens = ColorTokens(
     buttonBackground          = Brand40,
     buttonText                = Brand10,
     buttonSecondary           = Indigo40,
+    buttonSecondaryText       = Neutral99,
 
     navBarBackground          = NeutralVariant90,
     navBarActiveTab           = Brand90,
@@ -36,4 +37,7 @@ val LightTokens = ColorTokens(
 
     progressKnown             = Green40,
     progressUnknown           = Red40,
+
+    panelBackground           = NeutralVariant90,
+    panelText                 = Neutral10,
 )
