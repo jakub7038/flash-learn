@@ -17,7 +17,7 @@ private fun buildColorScheme(t: ColorTokens): ColorScheme = lightColorScheme(
     onPrimaryContainer   = t.navBarActiveTabText,
 
     secondary            = t.buttonSecondary,
-    onSecondary          = t.chipText,
+    onSecondary          = t.buttonSecondaryText,
     secondaryContainer   = t.chipBackground,
     onSecondaryContainer = t.chipText,
 
@@ -36,8 +36,8 @@ private fun buildColorScheme(t: ColorTokens): ColorScheme = lightColorScheme(
 
     surface              = t.screenBackground,
     onSurface            = t.textPrimary,
-    surfaceVariant       = t.navBarBackground,
-    onSurfaceVariant     = t.textSecondary,
+    surfaceVariant       = t.panelBackground,
+    onSurfaceVariant     = t.panelText,
 
     outline              = t.textFieldBorder,
     outlineVariant       = t.navBarInactiveIcon,
