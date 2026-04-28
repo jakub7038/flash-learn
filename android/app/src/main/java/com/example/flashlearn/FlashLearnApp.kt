@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
 import com.example.flashlearn.data.remote.RetrofitClient
+import com.example.flashlearn.notification.NotificationHelper
 import dagger.hilt.android.HiltAndroidApp
 import javax.inject.Inject
 
@@ -21,5 +22,6 @@ class FlashLearnApp : Application(), Configuration.Provider {
     override fun onCreate() {
         super.onCreate()
         RetrofitClient.init(this)
+        NotificationHelper.createNotificationChannel(this)
     }
 }

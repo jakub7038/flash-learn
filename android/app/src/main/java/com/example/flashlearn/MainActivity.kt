@@ -1,5 +1,6 @@
 package com.example.flashlearn
 
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -11,6 +12,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.flashlearn.data.local.TokenManager
 import com.example.flashlearn.data.remote.RetrofitClient
+import com.example.flashlearn.notification.ReminderScheduler
 import com.example.flashlearn.ui.screens.DeckDetailScreen
 import com.example.flashlearn.ui.screens.DeckEditScreen
 import com.example.flashlearn.ui.screens.FlashcardEditScreen
@@ -21,10 +23,27 @@ import com.example.flashlearn.ui.screens.RegisterScreen
 import com.example.flashlearn.ui.theme.FlashLearnTheme
 import dagger.hilt.android.AndroidEntryPoint
 
+import android.os.Build
+import androidx.activity.result.contract.ActivityResultContracts
+
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import com.example.flashlearn.sync.ReminderWorker
+import java.util.concurrent.TimeUnit
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            requestPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+        }
+
+        val prefs = getSharedPreferences("settings", 0)
+        ReminderScheduler.schedule(this, prefs)
         TokenManager.init(applicationContext)
         enableEdgeToEdge()
         setContent {

@@ -84,4 +84,18 @@ interface FlashcardProgressDao {
     /** Usuwa wszystkie rekordy (używane przy wylogowaniu). */
     @Query("DELETE FROM flashcard_progress")
     suspend fun deleteAll(): Int
+
+    /**
+     * Zwraca true jeśli użytkownik uczył się dziś -
+     * tzn. istnieje fiszka której next_review_date > dzisiaj
+     * (została już powtórzona i zaplanowana na przyszłość)
+     */
+    @Query(
+        """
+    SELECT COUNT(*) > 0 FROM flashcard_progress
+    WHERE next_review_date > :todayEpochDay
+    AND repetitions > 0
+    """
+    )
+    suspend fun hasStudySessionToday(todayEpochDay: Long): Boolean
 }
