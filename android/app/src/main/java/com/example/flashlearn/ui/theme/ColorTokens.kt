@@ -6,6 +6,7 @@ data class ColorTokens(
     val buttonBackground: Color,
     val buttonText: Color,
     val buttonSecondary: Color,
+    val buttonSecondaryText: Color,
 
     val navBarBackground: Color,
     val navBarActiveTab: Color,
@@ -38,4 +39,7 @@ data class ColorTokens(
 
     val progressKnown: Color,
     val progressUnknown: Color,
+
+    val panelBackground: Color,
+    val panelText: Color
 )
