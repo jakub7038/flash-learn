@@ -30,7 +30,6 @@ fun DashboardScreen(
     viewModel: ProfileViewModel = hiltViewModel()
 ) {
     val logoutState by viewModel.logoutState.collectAsState()
-
     val userEmail = viewModel.email ?: "Użytkownik"
     val joinDate = viewModel.registeredAt ?: "Brak danych"
 
@@ -83,7 +82,7 @@ fun DashboardScreen(
             Column(modifier = Modifier.padding(20.dp)) {
                 ProfileInfoRow(
                     icon = { Icon(Icons.Default.Email, contentDescription = null) },
-                    label = stringResource(R.string.label_email_address), // Zmieniono
+                    label = stringResource(R.string.label_email_address),
                     value = userEmail
                 )
 
@@ -94,7 +93,7 @@ fun DashboardScreen(
 
                 ProfileInfoRow(
                     icon = { Icon(Icons.Default.DateRange, contentDescription = null) },
-                    label = stringResource(R.string.label_registered_at), // Zmieniono
+                    label = stringResource(R.string.label_registered_at),
                     value = joinDate
                 )
             }
