@@ -115,7 +115,7 @@ fun DashboardScreen(
             Icon(Icons.Default.Settings, contentDescription = null)
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                text = "Ustawienia aplikacji",
+                text = stringResource(R.string.btn_app_settings),
                 fontSize = 16.sp,
                 fontWeight = FontWeight.SemiBold
             )

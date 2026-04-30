@@ -1,7 +1,11 @@
 package com.example.flashlearn.ui.screens
 
+import android.Manifest
+import android.os.Build
 import android.app.TimePickerDialog
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -11,9 +15,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.flashlearn.ui.settings.SettingsViewModel
+import com.example.flashlearn.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -23,6 +29,16 @@ fun SettingsScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            viewModel.toggleNotifications(true)
+        } else {
+            viewModel.toggleNotifications(false)
+        }
+    }
 
     BackHandler(onBack = onBack)
 
@@ -37,10 +53,13 @@ fun SettingsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Ustawienia") },
+                title = { Text(stringResource(R.string.settings_title)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Wstecz")
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.content_desc_back)
+                        )
                     }
                 }
             )
@@ -58,13 +77,20 @@ fun SettingsScreen(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = "Powiadomienia o powtórkach",
+                    text = stringResource(R.string.settings_notifications),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onBackground
                 )
                 Switch(
                     checked = uiState.isNotificationsEnabled,
-                    onCheckedChange = { viewModel.toggleNotifications(it) }
+                    onCheckedChange = { isChecked ->
+                        // Logika sprawdzająca uprawnienia na Androidzie 13+
+                        if (isChecked && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                            permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                        } else {
+                            viewModel.toggleNotifications(isChecked)
+                        }
+                    }
                 )
             }
             HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
@@ -78,7 +104,7 @@ fun SettingsScreen(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = "Godzina przypomnienia",
+                    text = stringResource(R.string.settings_notification_time),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onBackground
                 )
@@ -99,7 +125,7 @@ fun SettingsScreen(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = "Język interfejsu",
+                    text = stringResource(R.string.settings_language),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onBackground
                 )

@@ -122,4 +122,12 @@
     <string name="nav_create">Add</string>
     <string name="nav_explore">Explore</string>
     <string name="nav_profile">Profile</string>
+
+
+    <!-- Settings Screen -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_notifications">Review notifications</string>
+    <string name="settings_notification_time">Reminder time</string>
+    <string name="settings_language">Interface language</string>
+    <string name="btn_app_settings">App settings</string>
 </resources>

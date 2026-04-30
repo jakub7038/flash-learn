@@ -2,6 +2,8 @@ package com.example.flashlearn.ui.settings
 
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.os.LocaleListCompat
 import androidx.lifecycle.ViewModel
 import com.example.flashlearn.notification.ReminderScheduler
 import com.example.flashlearn.sync.ReminderWorker
@@ -64,5 +66,25 @@ class SettingsViewModel @Inject constructor(
     fun updateLanguage(lang: String) {
         prefs.edit().putString("language", lang).apply()
         _uiState.update { it.copy(language = lang) }
+
+        val appLocales = LocaleListCompat.forLanguageTags(lang)
+        AppCompatDelegate.setApplicationLocales(appLocales)
+    }
+
+    init {
+        val savedLang = prefs.getString("language", "pl") ?: "pl"
+        _uiState.value = SettingsUiState(
+            isNotificationsEnabled = prefs.getBoolean("notifications_enabled", false),
+            notificationHour = prefs.getInt(ReminderWorker.PREF_NOTIFICATION_HOUR, 18),
+            notificationMinute = prefs.getInt(ReminderWorker.PREF_NOTIFICATION_MINUTE, 0),
+            language = savedLang
+        )
+
+
+        val appLocales = LocaleListCompat.forLanguageTags(savedLang)
+        if (AppCompatDelegate.getApplicationLocales() != appLocales) {
+            AppCompatDelegate.setApplicationLocales(appLocales)
+        }
     }
 }
+
