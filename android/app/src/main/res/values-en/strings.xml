@@ -155,4 +155,12 @@
     <string name="learn_home_no_decks_title">No decks</string>
     <string name="learn_home_no_decks_msg">Create a deck in the \"My decks\" tab to start learning.</string>
     <string name="learn_home_pick_another">Pick another deck</string>
+
+
+    <!-- Settings Screen -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_notifications">Review notifications</string>
+    <string name="settings_notification_time">Reminder time</string>
+    <string name="settings_language">Interface language</string>
+    <string name="btn_app_settings">App settings</string>
 </resources>

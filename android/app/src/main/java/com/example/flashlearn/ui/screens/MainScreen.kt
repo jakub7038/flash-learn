@@ -59,6 +59,9 @@ fun MainScreen(
     var showReconnectedBanner by remember { mutableStateOf(false) }
     var wasOffline by remember { mutableStateOf(false) }
 
+    // Stan zarządzający wyświetlaniem okna ustawień na podstronie profilu
+    var isSettingsOpen by rememberSaveable { mutableStateOf(false) }
+
     LaunchedEffect(isOnline) {
         if (!isOnline) {
             wasOffline = true
@@ -72,6 +75,13 @@ fun MainScreen(
 
     var selectedIndex by rememberSaveable { mutableIntStateOf(0) }
     val selectedItem = items[selectedIndex]
+
+    // Resetowanie flagi ustawień, jeśli użytkownik zmieni zakładkę na dolnym pasku
+    LaunchedEffect(selectedIndex) {
+        if (items[selectedIndex] != BottomNavItem.Profile) {
+            isSettingsOpen = false
+        }
+    }
 
     Scaffold(
         bottomBar = {
@@ -107,14 +117,14 @@ fun MainScreen(
                                     imageVector = item.icon,
                                     contentDescription = title,
                                     tint = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer
-                                           else MaterialTheme.colorScheme.onSurfaceVariant
+                                    else MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                                 Spacer(modifier = Modifier.height(4.dp))
                                 Text(
                                     text = title,
                                     fontSize = 11.sp,
                                     color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer
-                                            else MaterialTheme.colorScheme.onSurfaceVariant
+                                    else MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
                         }
@@ -149,7 +159,18 @@ fun MainScreen(
                     )
                     BottomNavItem.Create -> CreateScreen()
                     BottomNavItem.Explore -> MarketplaceScreen()
-                    BottomNavItem.Profile -> DashboardScreen(onLogout = onLogout)
+                    BottomNavItem.Profile -> {
+                        if (isSettingsOpen) {
+                            SettingsScreen(
+                                onBack = { isSettingsOpen = false }
+                            )
+                        } else {
+                            DashboardScreen(
+                                onLogout = onLogout,
+                                onNavigateToSettings = { isSettingsOpen = true }
+                            )
+                        }
+                    }
                 }
             }
         }

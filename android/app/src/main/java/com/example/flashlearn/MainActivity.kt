@@ -1,5 +1,6 @@
 package com.example.flashlearn
 
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -10,6 +11,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.flashlearn.data.remote.RetrofitClient
+import com.example.flashlearn.notification.ReminderScheduler
 import com.example.flashlearn.ui.screens.DeckDetailScreen
 import com.example.flashlearn.ui.screens.DeckEditScreen
 import com.example.flashlearn.ui.screens.FlashcardEditScreen
@@ -20,15 +22,36 @@ import com.example.flashlearn.ui.screens.MainScreen
 import com.example.flashlearn.ui.screens.RegisterScreen
 import com.example.flashlearn.ui.theme.FlashLearnTheme
 import dagger.hilt.android.AndroidEntryPoint
+import androidx.appcompat.app.AppCompatActivity
 
+import android.os.Build
+import androidx.activity.result.contract.ActivityResultContracts
+
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import com.example.flashlearn.data.local.TokenManager
+import com.example.flashlearn.sync.ReminderWorker
+import java.util.concurrent.TimeUnit
 @AndroidEntryPoint
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
+    val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
-        val prefs = applicationContext.getSharedPreferences("flashlearn_prefs", android.content.Context.MODE_PRIVATE)
+        com.example.flashlearn.notification.NotificationHelper.createNotificationChannel(this)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            requestPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+        }
+
+        val prefs = getSharedPreferences("settings", 0)
+        ReminderScheduler.schedule(this, prefs)
+        TokenManager.init(applicationContext)
+
+        val authprefs = applicationContext.getSharedPreferences("flashlearn_prefs", android.content.Context.MODE_PRIVATE)
         val hasToken = prefs.getString("access_token", null) != null
-        
+
         enableEdgeToEdge()
         setContent {
             FlashLearnTheme {
