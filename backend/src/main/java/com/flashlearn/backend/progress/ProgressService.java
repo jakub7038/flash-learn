@@ -1,10 +1,12 @@
 package com.flashlearn.backend.progress;
 
+import com.flashlearn.backend.exception.UserNotFoundException;
 import com.flashlearn.backend.model.User;
 import com.flashlearn.backend.model.UserFlashcardProgress;
 import com.flashlearn.backend.repository.UserFlashcardProgressRepository;
 import com.flashlearn.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,10 +32,7 @@ public class ProgressService {
      */
     @Transactional(readOnly = true)
     public List<ProgressResponse> getAll() {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
+        User user = getCurrentUser();
         return progressRepository.findByUserId(user.getId())
                 .stream()
                 .map(this::toResponse)
@@ -48,15 +47,30 @@ public class ProgressService {
      */
     @Transactional(readOnly = true)
     public List<ProgressResponse> getDueToday() {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
+        User user = getCurrentUser();
         return progressRepository
                 .findByUserIdAndNextReviewDateLessThanEqual(user.getId(), LocalDate.now())
                 .stream()
                 .map(this::toResponse)
                 .toList();
+    }
+
+    /**
+     * Pobiera zalogowanego użytkownika z SecurityContext.
+     * Rzuca wyjątek jeśli brak autentykacji lub użytkownik nie istnieje w bazie.
+     *
+     * @return zalogowany użytkownik
+     * @throws RuntimeException gdy brak autentykacji w kontekście
+     * @throws UserNotFoundException gdy użytkownik nie istnieje w bazie
+     */
+    private User getCurrentUser() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated()) {
+            throw new RuntimeException("No authentication found in security context");
+        }
+        String email = auth.getName();
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException(email));
     }
 
     private ProgressResponse toResponse(UserFlashcardProgress p) {
