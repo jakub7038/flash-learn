@@ -10,7 +10,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.flashlearn.data.local.TokenManager
 import com.example.flashlearn.data.remote.RetrofitClient
 import com.example.flashlearn.notification.ReminderScheduler
 import com.example.flashlearn.ui.screens.DeckDetailScreen
@@ -18,6 +17,7 @@ import com.example.flashlearn.ui.screens.DeckEditScreen
 import com.example.flashlearn.ui.screens.FlashcardEditScreen
 import com.example.flashlearn.ui.screens.FlashcardListScreen
 import com.example.flashlearn.ui.screens.LoginScreen
+import com.example.flashlearn.ui.screens.LearnScreen
 import com.example.flashlearn.ui.screens.MainScreen
 import com.example.flashlearn.ui.screens.RegisterScreen
 import com.example.flashlearn.ui.theme.FlashLearnTheme
@@ -29,6 +29,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
+import com.example.flashlearn.data.local.TokenManager
 import com.example.flashlearn.sync.ReminderWorker
 import java.util.concurrent.TimeUnit
 @AndroidEntryPoint
@@ -47,11 +48,15 @@ class MainActivity : AppCompatActivity() {
         val prefs = getSharedPreferences("settings", 0)
         ReminderScheduler.schedule(this, prefs)
         TokenManager.init(applicationContext)
+
+        val authprefs = applicationContext.getSharedPreferences("flashlearn_prefs", android.content.Context.MODE_PRIVATE)
+        val hasToken = prefs.getString("access_token", null) != null
+
         enableEdgeToEdge()
         setContent {
             FlashLearnTheme {
                 val navController = rememberNavController()
-                val startDestination = if (TokenManager.getAccessToken() != null) "main" else "login"
+                val startDestination = if (hasToken) "main" else "login"
 
                 NavHost(
                     navController = navController,
@@ -80,7 +85,6 @@ class MainActivity : AppCompatActivity() {
                     composable("main") {
                         MainScreen(
                             onLogout = {
-                                TokenManager.clearTokens()
                                 navController.navigate("login") {
                                     popUpTo(0)
                                 }
@@ -90,6 +94,9 @@ class MainActivity : AppCompatActivity() {
                             },
                             onNavigateToDeckDetail = { deckId ->
                                 navController.navigate("deck/$deckId/detail")
+                            },
+                            onNavigateToLearn = { deckId ->
+                                navController.navigate("learn/$deckId")
                             }
                         )
                     }
@@ -116,8 +123,16 @@ class MainActivity : AppCompatActivity() {
                         DeckDetailScreen(
                             deckId = deckId,
                             onNavigateBack = { navController.popBackStack() },
-                            onNavigateToLearn = { /* docelowo: navController.navigate("learn/$deckId") */ },
+                            onNavigateToLearn = { id -> navController.navigate("learn/$id") },
                             onNavigateToFlashcards = { id -> navController.navigate("deck/$id/flashcards") }
+                        )
+                    }
+                    composable(
+                        route = "learn/{deckId}",
+                        arguments = listOf(navArgument("deckId") { type = NavType.LongType })
+                    ) {
+                        LearnScreen(
+                            onNavigateBack = { navController.popBackStack() }
                         )
                     }
                     composable(

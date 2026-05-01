@@ -68,8 +68,9 @@ object AppModule {
     @Singleton
     fun provideAuthRepository(
         api: AuthApiService,
-        prefs: SharedPreferences
+        prefs: SharedPreferences,
+        db: AppDatabase
     ): AuthRepository {
-        return AuthRepositoryImpl(api, prefs)
+        return AuthRepositoryImpl(api, prefs, db)
     }
 }

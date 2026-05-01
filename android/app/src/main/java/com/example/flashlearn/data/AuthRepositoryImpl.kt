@@ -8,6 +8,9 @@ import com.example.flashlearn.data.remote.LogoutRequest
 import com.example.flashlearn.data.remote.RegisterRequest
 import com.example.flashlearn.data.remote.RegisterResponse
 import com.example.flashlearn.domain.repository.AuthRepository
+import com.flashlearn.data.db.AppDatabase
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import retrofit2.HttpException
 import java.io.IOException
 import java.text.SimpleDateFormat
@@ -17,7 +20,8 @@ import javax.inject.Inject
 
 class AuthRepositoryImpl @Inject constructor(
     private val api: AuthApiService,
-    private val prefs: SharedPreferences
+    private val prefs: SharedPreferences,
+    private val db: AppDatabase
 ) : AuthRepository {
 
     override suspend fun login(email: String, password: String): Result<LoginResponse> {
@@ -64,6 +68,9 @@ class AuthRepositoryImpl @Inject constructor(
     override suspend fun logout(): Result<Unit> {
         val refreshToken = prefs.getString("refresh_token", null) ?: ""
         clearTokens()
+        withContext(Dispatchers.IO) {
+            db.clearAllTables()
+        }
         return try {
             api.logout(LogoutRequest(refreshToken))
             Result.success(Unit)

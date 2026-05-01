@@ -116,6 +116,7 @@ public class SyncService {
         List<SyncFlashcardDTO> flashcardDTOs = flashcardPage.getContent().stream().map(f -> {
             SyncFlashcardDTO dto = new SyncFlashcardDTO();
             dto.setId(f.getId());
+            dto.setDeckId(f.getDeck().getId());
             dto.setQuestion(f.getQuestion());
             dto.setAnswer(f.getAnswer());
             dto.setUpdatedAt(f.getUpdatedAt());

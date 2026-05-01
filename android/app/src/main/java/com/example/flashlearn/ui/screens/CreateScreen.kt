@@ -156,7 +156,8 @@ fun CreateScreen(
                                     Column {
                                         Text(
                                             text = deck.title,
-                                            style = MaterialTheme.typography.bodyLarge
+                                            style = MaterialTheme.typography.bodyLarge,
+                                            color = MaterialTheme.colorScheme.onSurface
                                         )
                                         Text(
                                             text = stringResource(R.string.flashcards_count, deck.flashcardCount),

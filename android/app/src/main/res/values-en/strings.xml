@@ -122,6 +122,39 @@
     <string name="nav_create">Add</string>
     <string name="nav_explore">Explore</string>
     <string name="nav_profile">Profile</string>
+    <!-- DeckDetailScreen -->
+    <string name="deck_detail_total_flashcards">Total flashcards</string>
+    <string name="deck_detail_due_today">Due today</string>
+    <string name="deck_detail_mastery">Mastery level</string>
+    <string name="deck_detail_mastery_desc">Percentage of flashcards successfully retained. Higher % means better long-term memory.</string>
+    <string name="deck_detail_start_learning">Start learning</string>
+    <string name="deck_detail_manage_flashcards">Manage flashcards</string>
+
+    <!-- Learn session UI -->
+    <string name="learn_session_title">Learning session</string>
+    <string name="learn_great_job">Great job!</string>
+    <string name="learn_empty_message">No flashcards due today in deck \"%1$s\". Come back tomorrow!</string>
+    <string name="learn_back_to_deck">Back to deck</string>
+    <string name="learn_progress">Card %1$d of %2$d</string>
+    <string name="learn_hint_front">Tap to see the answer</string>
+    <string name="learn_hint_back">Rate your answer</string>
+    <string name="learn_label_question">QUESTION</string>
+    <string name="learn_label_answer">ANSWER</string>
+    <string name="learn_rate_unknown">Unknown</string>
+    <string name="learn_rate_hard">Hard</string>
+    <string name="learn_rate_easy">Easy</string>
+    <string name="learn_session_finished">Session finished!</string>
+    <string name="learn_repeat_session">Repeat session</string>
+    <string name="learn_back_to_menu">Back to menu</string>
+
+    <!-- LearnHomeScreen -->
+    <string name="learn_home_title">Learn</string>
+    <string name="learn_home_last_deck">Last learned deck</string>
+    <string name="learn_home_start">Start learning</string>
+    <string name="learn_home_all_decks">All decks</string>
+    <string name="learn_home_no_decks_title">No decks</string>
+    <string name="learn_home_no_decks_msg">Create a deck in the \"My decks\" tab to start learning.</string>
+    <string name="learn_home_pick_another">Pick another deck</string>
 
 
     <!-- Settings Screen -->

@@ -82,12 +82,12 @@ fun DeckDetailScreen(
                 ) {
                     StatCard(
                         modifier = Modifier.weight(1f),
-                        title = "Łącznie fiszek",
+                        title = stringResource(R.string.deck_detail_total_flashcards),
                         value = totalFlashcards.toString()
                     )
                     StatCard(
                         modifier = Modifier.weight(1f),
-                        title = "Do powtórki dziś",
+                        title = stringResource(R.string.deck_detail_due_today),
                         value = dueTodayCount.toString(),
                         highlight = dueTodayCount > 0
                     )
@@ -108,7 +108,7 @@ fun DeckDetailScreen(
                 ) {
                     Icon(Icons.Default.PlayArrow, contentDescription = null)
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Rozpocznij naukę", style = MaterialTheme.typography.titleMedium)
+                    Text(stringResource(R.string.deck_detail_start_learning), style = MaterialTheme.typography.titleMedium)
                 }
 
                 OutlinedButton(
@@ -120,7 +120,7 @@ fun DeckDetailScreen(
                 ) {
                     Icon(Icons.Default.Edit, contentDescription = null)
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Zarządzaj fiszkami", style = MaterialTheme.typography.titleMedium)
+                    Text(stringResource(R.string.deck_detail_manage_flashcards), style = MaterialTheme.typography.titleMedium)
                 }
             }
         }
@@ -228,14 +228,14 @@ private fun MasterySection(percentage: Float) {
             Spacer(modifier = Modifier.width(16.dp))
             Column {
                 Text(
-                    text = "Poziom opanowania",
+                    text = stringResource(R.string.deck_detail_mastery),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSecondaryContainer
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "Odsetek fiszek, które pomyślnie utrwaliłeś. Wyższy % to lepsza pamięć długotrwała.",
+                    text = stringResource(R.string.deck_detail_mastery_desc),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.8f)
                 )

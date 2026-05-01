@@ -122,6 +122,39 @@
     <string name="nav_create">Dodaj</string>
     <string name="nav_explore">Przeglądaj</string>
     <string name="nav_profile">Profil</string>
+    <!-- DeckDetailScreen -->
+    <string name="deck_detail_total_flashcards">Łącznie fiszek</string>
+    <string name="deck_detail_due_today">Do powtórki dziś</string>
+    <string name="deck_detail_mastery">Poziom opanowania</string>
+    <string name="deck_detail_mastery_desc">Odsetek fiszek, które pomyślnie utrwaliłeś. Wyższy % to lepsza pamięć długotrwała.</string>
+    <string name="deck_detail_start_learning">Rozpocznij naukę</string>
+    <string name="deck_detail_manage_flashcards">Zarządzaj fiszkami</string>
+
+    <!-- Learn session UI -->
+    <string name="learn_session_title">Sesja nauki</string>
+    <string name="learn_great_job">Świetna robota!</string>
+    <string name="learn_empty_message">Brak fiszek do powtórki na dziś w talii „%1$s”. Wróć jutro!</string>
+    <string name="learn_back_to_deck">Wróć do talii</string>
+    <string name="learn_progress">Karta %1$d z %2$d</string>
+    <string name="learn_hint_front">Dotknij, aby zobaczyć odpowiedź</string>
+    <string name="learn_hint_back">Oceń swoją odpowiedź</string>
+    <string name="learn_label_question">PYTANIE</string>
+    <string name="learn_label_answer">ODPOWIEDŹ</string>
+    <string name="learn_rate_unknown">Nie wiem</string>
+    <string name="learn_rate_hard">Trudne</string>
+    <string name="learn_rate_easy">Łatwe</string>
+    <string name="learn_session_finished">Sesja zakończona!</string>
+    <string name="learn_repeat_session">Powtórz sesję</string>
+    <string name="learn_back_to_menu">Wróć do menu</string>
+
+    <!-- LearnHomeScreen -->
+    <string name="learn_home_title">Nauka</string>
+    <string name="learn_home_last_deck">Ostatnio uczona talia</string>
+    <string name="learn_home_start">Rozpocznij naukę</string>
+    <string name="learn_home_all_decks">Wszystkie talie</string>
+    <string name="learn_home_no_decks_title">Brak talii</string>
+    <string name="learn_home_no_decks_msg">Utwórz talię w zakładce „Moje talie", aby rozpocząć naukę.</string>
+    <string name="learn_home_pick_another">Wybierz inną talię</string>
 
     <!-- Settings Screen -->
     <string name="settings_title">Ustawienia</string>

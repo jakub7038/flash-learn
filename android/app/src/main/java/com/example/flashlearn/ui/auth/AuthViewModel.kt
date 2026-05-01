@@ -19,7 +19,8 @@ class AuthViewModel @Inject constructor(
     application: Application,
     private val loginUseCase: LoginUseCase,
     private val registerUseCase: RegisterUseCase,
-    private val repository: AuthRepository
+    private val repository: AuthRepository,
+    private val syncManager: com.example.flashlearn.sync.SyncManager
 ) : AndroidViewModel(application) {
 
     private val _uiState = MutableStateFlow<AuthUiState>(AuthUiState.Idle)
@@ -32,14 +33,8 @@ class AuthViewModel @Inject constructor(
                 onSuccess = { response ->
                     repository.saveTokens(response.accessToken, response.refreshToken)
                     
-                    val constraints = androidx.work.Constraints.Builder()
-                        .setRequiredNetworkType(androidx.work.NetworkType.CONNECTED)
-                        .build()
-                    val syncRequest = androidx.work.OneTimeWorkRequestBuilder<com.example.flashlearn.sync.SyncWorker>()
-                        .setConstraints(constraints)
-                        .build()
-                    androidx.work.WorkManager.getInstance(getApplication()).enqueue(syncRequest)
-
+                    syncManager.scheduleSync()
+                    
                     _uiState.value = AuthUiState.Success
                 },
                 onFailure = { error ->

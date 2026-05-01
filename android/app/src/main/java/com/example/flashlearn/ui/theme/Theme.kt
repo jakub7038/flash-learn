@@ -19,7 +19,7 @@ private fun buildColorScheme(t: ColorTokens): ColorScheme = lightColorScheme(
     secondary            = t.buttonSecondary,
     onSecondary          = t.buttonSecondaryText,
     secondaryContainer   = t.chipBackground,
-    onSecondaryContainer = t.chipText,
+    onSecondaryContainer = t.chipText, // chipText is light (Indigo90) in dark mode → readable on Indigo30
 
     tertiary             = t.cardCorrect,
     onTertiary           = t.cardCorrectText,
