@@ -10,7 +10,8 @@ import javax.inject.Singleton
 
 @Singleton
 class DeckRepository @Inject constructor(
-    private val deckDao: DeckDao
+    private val deckDao: DeckDao,
+    private val syncManager: com.example.flashlearn.sync.SyncManager
 ) {
     fun observeAllDecks(): Flow<List<Deck>> = deckDao.observeAll()
 
@@ -23,10 +24,18 @@ class DeckRepository @Inject constructor(
             createdAt = Instant.now().epochSecond,
             updatedAt = Instant.now().epochSecond,
         )
-        return deckDao.insert(deck)
+        val id = deckDao.insert(deck)
+        syncManager.scheduleSync()
+        return id
     }
 
-    suspend fun deleteDeck(deck: Deck) = deckDao.delete(deck)
+    suspend fun deleteDeck(deck: Deck) {
+        deckDao.delete(deck)
+        syncManager.scheduleSync()
+    }
 
-    suspend fun deleteDeckById(id: Long) = deckDao.deleteById(id)
+    suspend fun deleteDeckById(id: Long) {
+        deckDao.deleteById(id)
+        syncManager.scheduleSync()
+    }
 }

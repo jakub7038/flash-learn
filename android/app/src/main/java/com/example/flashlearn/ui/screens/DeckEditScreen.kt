@@ -93,6 +93,7 @@ fun DeckEditScreen(
                     )
                 )
             }
+            com.example.flashlearn.sync.SyncManager(context.applicationContext).scheduleSync()
             isSaving = false
             onNavigateBack()
         }

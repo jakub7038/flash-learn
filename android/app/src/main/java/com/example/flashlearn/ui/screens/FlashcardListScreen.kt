@@ -54,7 +54,10 @@ fun FlashcardListScreen(
                     onClick = {
                         val target = flashcardToDelete!!
                         flashcardToDelete = null
-                        scope.launch { flashcardDao.delete(target) }
+                        scope.launch { 
+                            flashcardDao.delete(target) 
+                            com.example.flashlearn.sync.SyncManager(context.applicationContext).scheduleSync()
+                        }
                     }
                 ) {
                     Text(stringResource(R.string.btn_delete), color = MaterialTheme.colorScheme.error)
