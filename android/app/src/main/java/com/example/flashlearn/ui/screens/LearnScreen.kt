@@ -400,36 +400,35 @@ private fun RatingButtons(visible: Boolean, onRate: (Int) -> Unit) {
             .graphicsLayer { this.alpha = alpha },
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        // Nie wiem — grade 0
+        // Łatwe — grade 3
         RatingButton(
             modifier = Modifier.weight(1f),
-            label = stringResource(R.string.learn_rate_unknown),
-            emoji = "😕",
-            containerColor = MaterialTheme.colorScheme.errorContainer,
-            contentColor = MaterialTheme.colorScheme.onErrorContainer,
-            onClick = { if (visible) onRate(0) },
+            label = stringResource(R.string.learn_rate_easy),
+            emoji = "😎",
+            containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+            contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+            onClick = { if (visible) onRate(3) },
         )
         // Trudne — grade 1
         RatingButton(
             modifier = Modifier.weight(1f),
             label = stringResource(R.string.learn_rate_hard),
-            emoji = "😐",
+            emoji = "🤔",
             containerColor = MaterialTheme.colorScheme.secondaryContainer,
             contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
             onClick = { if (visible) onRate(1) },
         )
-        // Łatwe — grade 3
+        // Nie wiem — grade 0
         RatingButton(
             modifier = Modifier.weight(1f),
-            label = stringResource(R.string.learn_rate_easy),
-            emoji = "😊",
-            containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-            contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
-            onClick = { if (visible) onRate(3) },
+            label = stringResource(R.string.learn_rate_unknown),
+            emoji = "🤯",
+            containerColor = MaterialTheme.colorScheme.errorContainer,
+            contentColor = MaterialTheme.colorScheme.onErrorContainer,
+            onClick = { if (visible) onRate(0) },
         )
     }
 }
-
 @Composable
 private fun RatingButton(
     modifier: Modifier = Modifier,
