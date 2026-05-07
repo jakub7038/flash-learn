@@ -18,6 +18,14 @@ public class Deck {
     @JoinColumn(name = "owner_id", nullable = false)
     private User owner;
 
+    /**
+     * Kategoria talii — opcjonalna. Null oznacza brak kategorii (np. "Inne").
+     * Uzywana w Marketplace do filtrowania i wyswietlania ikon.
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id")
+    private Category category;
+
     @Column(nullable = false, length = 100)
     private String title;
 
