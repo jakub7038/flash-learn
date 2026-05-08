@@ -131,9 +131,7 @@ public class MarketplaceService {
 
         List<Flashcard> savedFlashcards = flashcardRepository.saveAll(clonedFlashcards);
 
-        // Inkrementacja download_count oryginalnej talii
-        original.setDownloadCount(original.getDownloadCount() + 1);
-        deckRepository.save(original);
+        deckRepository.incrementDownloadCount(original.getId());
 
         log.info("Deck id={} sklonowany przez uzytkownika id={}. Nowa talia id={}",
                 original.getId(), user.getId(), savedDeck.getId());
