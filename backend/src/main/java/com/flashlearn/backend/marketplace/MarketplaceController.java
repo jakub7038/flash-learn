@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,9 +22,7 @@ public class MarketplaceController {
     @Operation(summary = "Pobierz publiczne talie",
             description = "Publiczny endpoint — nie wymaga JWT. Sortowanie po popularności. " +
                     "Opcjonalne filtrowanie po kategorii (?category={slug}).")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Stronicowana lista talii"),
-    })
+    @ApiResponse(responseCode = "200", description = "Stronicowana lista talii")
     @GetMapping
     public ResponseEntity<MarketplacePageResponse> getDecks(
             @RequestParam(required = false) String category,
@@ -45,6 +44,20 @@ public class MarketplaceController {
     public ResponseEntity<Void> publish(@Valid @RequestBody PublishRequest request) {
         marketplaceService.publish(request);
         return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Sklonuj talię do swojej biblioteki",
+            description = "Tworzy głęboką kopię publicznej talii wraz ze wszystkimi fiszkami. " +
+                    "Inkrementuje download_count oryginału. Wymaga JWT.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Talia sklonowana — zwraca nowe deckId z fiszkami"),
+            @ApiResponse(responseCode = "401", description = "Brak autoryzacji"),
+            @ApiResponse(responseCode = "404", description = "Talia nie istnieje lub nie jest publiczna")
+    })
+    @SecurityRequirement(name = "bearerAuth")
+    @PostMapping("/{id}/clone")
+    public ResponseEntity<CloneResponse> clone(@PathVariable Long id) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(marketplaceService.clone(id));
     }
 
     @Operation(summary = "Zgłoś talię jako nieodpowiednią",

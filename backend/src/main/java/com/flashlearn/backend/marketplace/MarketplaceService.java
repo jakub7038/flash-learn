@@ -3,8 +3,10 @@ package com.flashlearn.backend.marketplace;
 import com.flashlearn.backend.exception.DeckNotFoundException;
 import com.flashlearn.backend.exception.ResourceAccessDeniedException;
 import com.flashlearn.backend.model.Deck;
+import com.flashlearn.backend.model.Flashcard;
 import com.flashlearn.backend.model.User;
 import com.flashlearn.backend.repository.DeckRepository;
+import com.flashlearn.backend.repository.FlashcardRepository;
 import com.flashlearn.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,10 +19,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
+
 /**
  * Serwis obsługujący Marketplace — publiczne talie dostępne do klonowania.
  * Endpointy GET /marketplace są publiczne (bez JWT).
- * Endpointy POST /marketplace/publish i POST /marketplace/report wymagają JWT.
+ * Endpointy POST /marketplace/publish, /report i /clone wymagają JWT.
  */
 @Slf4j
 @Service
@@ -30,6 +34,7 @@ public class MarketplaceService {
     private static final int DEFAULT_PAGE_SIZE = 20;
 
     private final DeckRepository deckRepository;
+    private final FlashcardRepository flashcardRepository;
     private final UserRepository userRepository;
 
     /**
@@ -79,6 +84,70 @@ public class MarketplaceService {
 
         deck.setPublic(true);
         deckRepository.save(deck);
+    }
+
+    /**
+     * Klonuje publiczną talię do biblioteki zalogowanego użytkownika.
+     * Tworzy głęboką kopię talii wraz z wszystkimi fiszkami.
+     * Inkrementuje download_count oryginalnej talii.
+     *
+     * @param deckId identyfikator talii do sklonowania
+     * @return nowa talia z listą skopiowanych fiszek
+     * @throws DeckNotFoundException gdy talia nie istnieje lub nie jest publiczna
+     */
+    @Transactional
+    public CloneResponse clone(Long deckId) {
+        User user = getCurrentUser();
+
+        Deck original = deckRepository.findById(deckId)
+                .orElseThrow(() -> new DeckNotFoundException(deckId));
+
+        if (!original.isPublic()) {
+            throw new DeckNotFoundException(deckId);
+        }
+
+        // Głęboka kopia talii przypisana do zalogowanego użytkownika
+        Deck cloned = Deck.builder()
+                .owner(user)
+                .title(original.getTitle())
+                .description(original.getDescription())
+                .category(original.getCategory())
+                .isPublic(false)
+                .downloadCount(0)
+                .build();
+
+        Deck savedDeck = deckRepository.save(cloned);
+
+        // Kopia wszystkich fiszek
+        List<Flashcard> originalFlashcards = flashcardRepository.findByDeckId(original.getId());
+
+        List<Flashcard> clonedFlashcards = originalFlashcards.stream()
+                .map(f -> Flashcard.builder()
+                        .deck(savedDeck)
+                        .question(f.getQuestion())
+                        .answer(f.getAnswer())
+                        .build())
+                .toList();
+
+        List<Flashcard> savedFlashcards = flashcardRepository.saveAll(clonedFlashcards);
+
+        // Inkrementacja download_count oryginalnej talii
+        original.setDownloadCount(original.getDownloadCount() + 1);
+        deckRepository.save(original);
+
+        log.info("Deck id={} sklonowany przez uzytkownika id={}. Nowa talia id={}",
+                original.getId(), user.getId(), savedDeck.getId());
+
+        List<ClonedFlashcardResponse> flashcardResponses = savedFlashcards.stream()
+                .map(f -> new ClonedFlashcardResponse(f.getId(), f.getQuestion(), f.getAnswer()))
+                .toList();
+
+        return new CloneResponse(
+                savedDeck.getId(),
+                savedDeck.getTitle(),
+                savedDeck.getDescription(),
+                flashcardResponses
+        );
     }
 
     /**
