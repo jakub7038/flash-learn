@@ -18,7 +18,8 @@ data class SettingsUiState(
     val isNotificationsEnabled: Boolean = false,
     val notificationHour: Int = 18,
     val notificationMinute: Int = 0,
-    val language: String = "pl"
+    val language: String = "pl",
+    val theme: String = "system"
 )
 
 @HiltViewModel
@@ -30,13 +31,26 @@ class SettingsViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(SettingsUiState())
     val uiState = _uiState.asStateFlow()
 
+    // Tylko jeden, połączony blok init!
     init {
+        // 1. Najpierw pobieramy zapisane wartości z SharedPreferences
+        val savedLang = prefs.getString("language", "pl") ?: "pl"
+        val savedTheme = prefs.getString("theme", "system") ?: "system"
+
+        // 2. Inicjalizujemy stan UI pobranymi danymi
         _uiState.value = SettingsUiState(
             isNotificationsEnabled = prefs.getBoolean("notifications_enabled", false),
             notificationHour = prefs.getInt(ReminderWorker.PREF_NOTIFICATION_HOUR, 18),
             notificationMinute = prefs.getInt(ReminderWorker.PREF_NOTIFICATION_MINUTE, 0),
-            language = prefs.getString("language", "pl") ?: "pl"
+            language = savedLang,
+            theme = savedTheme
         )
+
+        // 3. Wymuszamy załadowanie języka, jeśli systemowy różni się od zapisanego
+        val appLocales = LocaleListCompat.forLanguageTags(savedLang)
+        if (AppCompatDelegate.getApplicationLocales() != appLocales) {
+            AppCompatDelegate.setApplicationLocales(appLocales)
+        }
     }
 
     fun toggleNotifications(enabled: Boolean) {
@@ -71,20 +85,15 @@ class SettingsViewModel @Inject constructor(
         AppCompatDelegate.setApplicationLocales(appLocales)
     }
 
-    init {
-        val savedLang = prefs.getString("language", "pl") ?: "pl"
-        _uiState.value = SettingsUiState(
-            isNotificationsEnabled = prefs.getBoolean("notifications_enabled", false),
-            notificationHour = prefs.getInt(ReminderWorker.PREF_NOTIFICATION_HOUR, 18),
-            notificationMinute = prefs.getInt(ReminderWorker.PREF_NOTIFICATION_MINUTE, 0),
-            language = savedLang
-        )
+    fun updateTheme(theme: String) {
+        prefs.edit().putString("theme", theme).apply()
+        _uiState.update { it.copy(theme = theme) }
 
-
-        val appLocales = LocaleListCompat.forLanguageTags(savedLang)
-        if (AppCompatDelegate.getApplicationLocales() != appLocales) {
-            AppCompatDelegate.setApplicationLocales(appLocales)
+        val mode = when (theme) {
+            "light" -> AppCompatDelegate.MODE_NIGHT_NO
+            "dark" -> AppCompatDelegate.MODE_NIGHT_YES
+            else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
         }
+        AppCompatDelegate.setDefaultNightMode(mode)
     }
 }
-
