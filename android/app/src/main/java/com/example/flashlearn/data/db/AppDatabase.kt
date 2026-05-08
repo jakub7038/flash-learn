@@ -34,7 +34,7 @@ import com.flashlearn.data.entity.FlashcardProgress
  */
 @Database(
     entities = [Deck::class, Flashcard::class, FlashcardProgress::class],
-    version = 2,
+    version = 3,
     exportSchema = true,          // generuje JSON schema do kontroli wersji
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -75,6 +75,32 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE decks ADD COLUMN is_readonly INTEGER NOT NULL DEFAULT 0")
+                db.execSQL("ALTER TABLE decks ADD COLUMN category_slug TEXT")
+                // seed dla istniejących instalacji
+                SeedData.insert(db)
+            }
+        }
+
+        private val PREPOPULATE_CALLBACK = object : RoomDatabase.Callback() {
+            override fun onCreate(db: SupportSQLiteDatabase) {
+                super.onCreate(db)
+                SeedData.insert(db)
+            }
+
+            override fun onOpen(db: SupportSQLiteDatabase) {
+                super.onOpen(db)
+                val cursor = db.query("SELECT COUNT(*) FROM decks WHERE is_readonly = 1")
+                cursor.moveToFirst()
+                val count = cursor.getInt(0)
+                cursor.close()
+                if (count == 0) SeedData.insert(db)
+            }
+        }
+
+
         @Volatile
         private var INSTANCE: AppDatabase? = null
 
@@ -96,7 +122,8 @@ abstract class AppDatabase : RoomDatabase() {
                 AppDatabase::class.java,
                 DB_NAME,
             )
-                .addMigrations(MIGRATION_1_2)
+                .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
+                .addCallback(PREPOPULATE_CALLBACK)
                 .fallbackToDestructiveMigrationOnDowngrade()
                 .build()
 

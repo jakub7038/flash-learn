@@ -136,4 +136,31 @@ interface DeckDao {
     /** Usuwa talię po ID. */
     @Query("DELETE FROM decks WHERE id = :id")
     suspend fun deleteById(id: Long): Int
+
+    /**
+     * Obserwuje gotowe zestawy readonly (seed z prepopulate).
+     * Wyświetlane w sekcji "Gotowe zestawy" na liście talii.
+     */
+    @Query("""
+    SELECT d.id, d.title, d.description, d.updated_at AS updatedAt, COUNT(f.id) AS flashcardCount
+    FROM decks d
+    LEFT JOIN flashcards f ON d.id = f.deck_id
+    WHERE d.is_readonly = 1
+    GROUP BY d.id
+    ORDER BY d.id ASC
+""")
+    fun observeReadonlyWithCount(): Flow<List<DeckWithCount>>
+
+    /**
+     * Obserwuje talie użytkownika (nie-readonly) posortowane od najnowszej.
+     */
+    @Query("""
+    SELECT d.id, d.title, d.description, d.updated_at AS updatedAt, COUNT(f.id) AS flashcardCount
+    FROM decks d
+    LEFT JOIN flashcards f ON d.id = f.deck_id
+    WHERE d.is_readonly = 0
+    GROUP BY d.id
+    ORDER BY d.created_at DESC
+""")
+    fun observeUserDecksWithCount(): Flow<List<DeckWithCount>>
 }

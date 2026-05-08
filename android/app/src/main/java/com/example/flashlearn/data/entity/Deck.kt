@@ -55,4 +55,18 @@ data class Deck(
      */
     @ColumnInfo(name = "needs_sync")
     val needsSync: Boolean = true,
+    /**
+     * Flaga gotowego zestawu readonly (seed z prepopulate).
+     * true = zestaw wbudowany, użytkownik nie może go edytować ani usunąć.
+     */
+    @ColumnInfo(name = "is_readonly")
+    val isReadonly: Boolean = false,
+
+    /**
+     * Slug kategorii zgodny z FL-143 (jezyki, programowanie, matematyka,
+     * nauki-scisle, historia, inne).
+     * Null dla talii bez kategorii lub zsynchronizowanych przez server_id.
+     */
+    @ColumnInfo(name = "category_slug")
+    val categorySlug: String? = null,
 )
