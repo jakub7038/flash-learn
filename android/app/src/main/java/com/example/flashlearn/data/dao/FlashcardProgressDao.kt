@@ -40,10 +40,10 @@ interface FlashcardProgressDao {
      */
     @Query(
         """
-        SELECT COUNT(*) FROM flashcard_progress fp
-        INNER JOIN flashcards f ON f.id = fp.flashcard_id
+        SELECT COUNT(*) FROM flashcards f
+        LEFT JOIN flashcard_progress fp ON f.id = fp.flashcard_id
         WHERE f.deck_id = :deckId
-          AND fp.next_review_date <= :todayEpochDay
+          AND (fp.next_review_date IS NULL OR fp.next_review_date <= :todayEpochDay)
         """
     )
     fun observeDueCount(deckId: Long, todayEpochDay: Long): Flow<Int>

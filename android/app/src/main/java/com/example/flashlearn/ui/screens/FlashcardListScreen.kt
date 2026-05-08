@@ -49,6 +49,9 @@ fun FlashcardListScreen(
             onDismissRequest = { flashcardToDelete = null },
             title = { Text(stringResource(R.string.dialog_delete_flashcard_title)) },
             text = { Text(stringResource(R.string.dialog_delete_flashcard_message)) },
+            containerColor = MaterialTheme.colorScheme.surface,
+            titleContentColor = MaterialTheme.colorScheme.onSurface,
+            textContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
             confirmButton = {
                 TextButton(
                     onClick = {

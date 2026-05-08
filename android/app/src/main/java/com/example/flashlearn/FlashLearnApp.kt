@@ -17,7 +17,7 @@ class FlashLearnApp : Application(), Configuration.Provider {
     @Inject
     lateinit var workerFactory: HiltWorkerFactory
 
-    // 1. Wstrzykujemy dokładnie te same SharedPreferences, których używa ekran ustawień!
+
     @Inject
     lateinit var prefs: SharedPreferences
 
@@ -28,16 +28,21 @@ class FlashLearnApp : Application(), Configuration.Provider {
 
     override fun onCreate() {
         super.onCreate()
-        // super.onCreate() inicjalizuje Hilta, więc od tego momentu zmienna 'prefs' jest gotowa do użycia
 
         RetrofitClient.init(this)
         NotificationHelper.createNotificationChannel(this)
 
-        // 2. Odczytujemy zapisany język (domyślnie "pl")
         val savedLang = prefs.getString("language", "pl") ?: "pl"
 
-        // 3. Wymuszamy natychmiastowe załadowanie odpowiedniego języka dla całej aplikacji
         val appLocales = LocaleListCompat.forLanguageTags(savedLang)
         AppCompatDelegate.setApplicationLocales(appLocales)
+
+        val savedTheme = prefs.getString("theme", "system") ?: "system"
+        val themeMode = when (savedTheme) {
+            "light" -> AppCompatDelegate.MODE_NIGHT_NO
+            "dark" -> AppCompatDelegate.MODE_NIGHT_YES
+            else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+        }
+        AppCompatDelegate.setDefaultNightMode(themeMode)
     }
 }

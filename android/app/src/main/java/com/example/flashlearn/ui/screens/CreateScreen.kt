@@ -1,5 +1,6 @@
 package com.example.flashlearn.ui.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -38,7 +39,10 @@ fun CreateScreen(
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
 
-    var selectedDeck by remember { mutableStateOf<DeckWithCount?>(null) }
+    var selectedDeckId by remember { mutableStateOf<Long?>(null) }
+    val selectedDeck = remember(selectedDeckId, decks) {
+        decks.find { it.id == selectedDeckId } ?: decks.firstOrNull()
+    }
     var dropdownExpanded by remember { mutableStateOf(false) }
     var question by remember { mutableStateOf("") }
     var answer by remember { mutableStateOf("") }
@@ -54,8 +58,8 @@ fun CreateScreen(
     val msgFlashcardAdded = stringResource(R.string.flashcard_added)
 
     LaunchedEffect(decks) {
-        if (selectedDeck == null && decks.isNotEmpty()) {
-            selectedDeck = decks.first()
+        if (selectedDeckId == null && decks.isNotEmpty()) {
+            selectedDeckId = decks.first().id
         }
     }
 
@@ -134,12 +138,8 @@ fun CreateScreen(
                         onValueChange = {},
                         readOnly = true,
                         label = { Text(stringResource(R.string.label_deck)) },
-                        trailingIcon = {
-                            Icon(
-                                imageVector = Icons.Default.ArrowDropDown,
-                                contentDescription = null
-                            )
-                        },
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = dropdownExpanded) },
+                        colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
                         isError = deckError != null,
                         supportingText = deckError?.let { { Text(it) } },
                         modifier = Modifier
@@ -148,7 +148,8 @@ fun CreateScreen(
                     )
                     ExposedDropdownMenu(
                         expanded = dropdownExpanded,
-                        onDismissRequest = { dropdownExpanded = false }
+                        onDismissRequest = { dropdownExpanded = false },
+                        modifier = Modifier.background(MaterialTheme.colorScheme.surface)
                     ) {
                         decks.forEach { deck ->
                             DropdownMenuItem(
@@ -167,7 +168,7 @@ fun CreateScreen(
                                     }
                                 },
                                 onClick = {
-                                    selectedDeck = deck
+                                    selectedDeckId = deck.id // Zapisujemy nowe ID!
                                     deckError = null
                                     dropdownExpanded = false
                                 }

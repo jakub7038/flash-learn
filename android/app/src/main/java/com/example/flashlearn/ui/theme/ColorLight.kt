@@ -2,7 +2,7 @@ package com.example.flashlearn.ui.theme
 
 val LightTokens = ColorTokens(
     buttonBackground          = Brand40,
-    buttonText                = Brand10,
+    buttonText                = Neutral99,
     buttonSecondary           = Indigo40,
     buttonSecondaryText       = Neutral99,
 

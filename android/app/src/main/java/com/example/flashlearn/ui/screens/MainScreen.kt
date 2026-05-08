@@ -59,7 +59,7 @@ fun MainScreen(
     var showReconnectedBanner by remember { mutableStateOf(false) }
     var wasOffline by remember { mutableStateOf(false) }
 
-    // Stan zarządzający wyświetlaniem okna ustawień na podstronie profilu
+
     var isSettingsOpen by rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(isOnline) {
@@ -76,7 +76,6 @@ fun MainScreen(
     var selectedIndex by rememberSaveable { mutableIntStateOf(0) }
     val selectedItem = items[selectedIndex]
 
-    // Resetowanie flagi ustawień, jeśli użytkownik zmieni zakładkę na dolnym pasku
     LaunchedEffect(selectedIndex) {
         if (items[selectedIndex] != BottomNavItem.Profile) {
             isSettingsOpen = false
