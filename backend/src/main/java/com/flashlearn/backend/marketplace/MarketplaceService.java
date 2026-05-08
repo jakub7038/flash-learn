@@ -2,9 +2,11 @@ package com.flashlearn.backend.marketplace;
 
 import com.flashlearn.backend.exception.DeckNotFoundException;
 import com.flashlearn.backend.exception.ResourceAccessDeniedException;
+import com.flashlearn.backend.model.Category;
 import com.flashlearn.backend.model.Deck;
 import com.flashlearn.backend.model.Flashcard;
 import com.flashlearn.backend.model.User;
+import com.flashlearn.backend.repository.CategoryRepository;
 import com.flashlearn.backend.repository.DeckRepository;
 import com.flashlearn.backend.repository.FlashcardRepository;
 import com.flashlearn.backend.repository.UserRepository;
@@ -24,7 +26,7 @@ import java.util.List;
 /**
  * Serwis obsługujący Marketplace — publiczne talie dostępne do klonowania.
  * Endpointy GET /marketplace są publiczne (bez JWT).
- * Endpointy POST /marketplace/publish, /report i /clone wymagają JWT.
+ * Endpointy POST /marketplace/publish, /submit, /report i /clone wymagają JWT.
  */
 @Slf4j
 @Service
@@ -32,9 +34,11 @@ import java.util.List;
 public class MarketplaceService {
 
     private static final int DEFAULT_PAGE_SIZE = 20;
+    private static final int MIN_FLASHCARDS_TO_SUBMIT = 5;
 
     private final DeckRepository deckRepository;
     private final FlashcardRepository flashcardRepository;
+    private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
 
     /**
@@ -87,6 +91,51 @@ public class MarketplaceService {
     }
 
     /**
+     * Zgłasza talię do Marketplace z kategorią i opcjonalnym opisem.
+     * Auto-akceptacja — talia jest od razu widoczna (isPublic=true).
+     * Walidacja: talia musi mieć min. 5 fiszek.
+     *
+     * @param request żądanie zgłoszenia z deckId, categoryId i opcjonalnym opisem
+     * @throws DeckNotFoundException gdy talia nie istnieje
+     * @throws ResourceAccessDeniedException gdy talia należy do innego użytkownika
+     * @throws ResponseStatusException 400 gdy talia ma mniej niż 5 fiszek
+     * @throws ResponseStatusException 404 gdy kategoria nie istnieje
+     */
+    @Transactional
+    public void submit(SubmitRequest request) {
+        User user = getCurrentUser();
+
+        Deck deck = deckRepository.findById(request.getDeckId())
+                .orElseThrow(() -> new DeckNotFoundException(request.getDeckId()));
+
+        if (!deck.getOwner().getId().equals(user.getId())) {
+            throw new ResourceAccessDeniedException("Access denied: deck id=" + request.getDeckId());
+        }
+
+        List<Flashcard> flashcards = flashcardRepository.findByDeckId(deck.getId());
+        if (flashcards.size() < MIN_FLASHCARDS_TO_SUBMIT) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Deck must have at least " + MIN_FLASHCARDS_TO_SUBMIT + " flashcards to be submitted. " +
+                            "Current count: " + flashcards.size());
+        }
+
+        Category category = categoryRepository.findById(request.getCategoryId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Category not found: id=" + request.getCategoryId()));
+
+        deck.setCategory(category);
+        deck.setPublic(true);
+        if (request.getDescription() != null && !request.getDescription().isBlank()) {
+            deck.setDescription(request.getDescription());
+        }
+
+        deckRepository.save(deck);
+
+        log.info("Deck id={} zgłoszony do Marketplace przez użytkownika id={}. Kategoria: {}, fiszek: {}",
+                deck.getId(), user.getId(), category.getSlug(), flashcards.size());
+    }
+
+    /**
      * Klonuje publiczną talię do biblioteki zalogowanego użytkownika.
      * Tworzy głęboką kopię talii wraz z wszystkimi fiszkami.
      * Inkrementuje download_count oryginalnej talii.
@@ -106,7 +155,6 @@ public class MarketplaceService {
             throw new DeckNotFoundException(deckId);
         }
 
-        // Głęboka kopia talii przypisana do zalogowanego użytkownika
         Deck cloned = Deck.builder()
                 .owner(user)
                 .title(original.getTitle())
@@ -118,7 +166,6 @@ public class MarketplaceService {
 
         Deck savedDeck = deckRepository.save(cloned);
 
-        // Kopia wszystkich fiszek
         List<Flashcard> originalFlashcards = flashcardRepository.findByDeckId(original.getId());
 
         List<Flashcard> clonedFlashcards = originalFlashcards.stream()

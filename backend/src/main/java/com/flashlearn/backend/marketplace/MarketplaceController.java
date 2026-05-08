@@ -46,6 +46,24 @@ public class MarketplaceController {
         return ResponseEntity.noContent().build();
     }
 
+    @Operation(summary = "Zgłoś talię do Marketplace z kategorią",
+            description = "Publikuje talię z przypisaną kategorią i opcjonalnym opisem. " +
+                    "Auto-akceptacja — talia jest od razu widoczna. " +
+                    "Walidacja: min. 5 fiszek w talii. Wymaga JWT.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Talia zgłoszona i opublikowana"),
+            @ApiResponse(responseCode = "400", description = "Błąd walidacji lub za mało fiszek"),
+            @ApiResponse(responseCode = "401", description = "Brak autoryzacji"),
+            @ApiResponse(responseCode = "403", description = "Talia należy do innego użytkownika"),
+            @ApiResponse(responseCode = "404", description = "Talia lub kategoria nie istnieje")
+    })
+    @SecurityRequirement(name = "bearerAuth")
+    @PostMapping("/submit")
+    public ResponseEntity<Void> submit(@Valid @RequestBody SubmitRequest request) {
+        marketplaceService.submit(request);
+        return ResponseEntity.noContent().build();
+    }
+
     @Operation(summary = "Sklonuj talię do swojej biblioteki",
             description = "Tworzy głęboką kopię publicznej talii wraz ze wszystkimi fiszkami. " +
                     "Inkrementuje download_count oryginału. Wymaga JWT.")
