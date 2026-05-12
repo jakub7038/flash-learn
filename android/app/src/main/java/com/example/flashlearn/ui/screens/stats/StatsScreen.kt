@@ -1,6 +1,7 @@
 package com.example.flashlearn.ui.screens.stats
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -14,10 +15,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -98,27 +101,63 @@ fun StatsContent(stats: StatsDto) {
 fun StreakCard(currentStreak: Int, longestStreak: Int) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
+            contentColor = MaterialTheme.colorScheme.onSurface
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+        shape = MaterialTheme.shapes.large
     ) {
         Column(
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(20.dp)
         ) {
-            Text("Streak nauki", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                "🔥 Seria nauki", 
+                style = MaterialTheme.typography.titleMedium, 
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Spacer(modifier = Modifier.height(20.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("$currentStreak", style = MaterialTheme.typography.displayMedium, color = MaterialTheme.colorScheme.primary)
-                    Text("Obecny", style = MaterialTheme.typography.bodyMedium)
-                }
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("$longestStreak", style = MaterialTheme.typography.displayMedium, color = MaterialTheme.colorScheme.secondary)
-                    Text("Najlepszy", style = MaterialTheme.typography.bodyMedium)
-                }
+                StreakItem(
+                    value = currentStreak,
+                    label = "Obecny",
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Divider(
+                    modifier = Modifier
+                        .height(50.dp)
+                        .width(1.dp)
+                        .align(Alignment.CenterVertically),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f)
+                )
+                StreakItem(
+                    value = longestStreak,
+                    label = "Najlepszy",
+                    color = MaterialTheme.colorScheme.tertiary
+                )
             }
         }
+    }
+}
+
+@Composable
+fun StreakItem(value: Int, label: String, color: Color) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(
+            text = "$value",
+            style = MaterialTheme.typography.displayMedium,
+            fontWeight = FontWeight.ExtraBold,
+            color = color
+        )
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }
 
@@ -126,55 +165,136 @@ fun StreakCard(currentStreak: Int, longestStreak: Int) {
 fun MasteryCard(stats: StatsDto) {
     val total = stats.totalReviewed
     val correct = stats.correctAnswers
+    val hard = stats.hardAnswers
+    val wrong = stats.wrongAnswers
+    
     val masteryPercent = if (total > 0) (correct.toFloat() / total) * 100 else 0f
 
     Card(
         modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
+            contentColor = MaterialTheme.colorScheme.onSurface
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+        shape = MaterialTheme.shapes.large
     ) {
         Row(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.padding(20.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(modifier = Modifier.weight(1f)) {
-                Text("Opanowanie materiału", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                Text(
+                    "🎯 Opanowanie materiału", 
+                    style = MaterialTheme.typography.titleMedium, 
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = "Na podstawie ostatnich 30 dni",
-                    style = MaterialTheme.typography.bodySmall,
+                    style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "Oceny: Złe: ${stats.wrongAnswers}, Trudne: ${stats.hardAnswers}, Dobre: ${stats.correctAnswers}",
-                    style = MaterialTheme.typography.bodySmall
-                )
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                // Legenda pionowa dla lepszej czytelności
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    val goodColor = Color(0xFF4CAF50) // Zielony kolor dla Dobrych
+                    RatingDot(color = goodColor, label = "$correct Dobre")
+                    RatingDot(color = MaterialTheme.colorScheme.secondary, label = "$hard Trudne")
+                    RatingDot(color = MaterialTheme.colorScheme.error, label = "$wrong Złe")
+                }
             }
-            Box(contentAlignment = Alignment.Center) {
-                val primaryColor = MaterialTheme.colorScheme.primary
-                val trackColor = MaterialTheme.colorScheme.surfaceVariant
-                Canvas(modifier = Modifier.size(80.dp)) {
+            Box(contentAlignment = Alignment.Center, modifier = Modifier.padding(start = 16.dp)) {
+                val goodColor = Color(0xFF4CAF50)
+                val secondaryColor = MaterialTheme.colorScheme.secondary
+                val errorColor = MaterialTheme.colorScheme.error
+                val trackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)
+                
+                Canvas(modifier = Modifier.size(100.dp)) {
+                    val strokeWidth = 14.dp.toPx()
+                    
+                    // Tło (gdy brak danych)
                     drawArc(
                         color = trackColor,
                         startAngle = 0f,
                         sweepAngle = 360f,
                         useCenter = false,
-                        style = Stroke(width = 8.dp.toPx(), cap = StrokeCap.Round)
+                        style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
                     )
-                    drawArc(
-                        color = primaryColor,
-                        startAngle = -90f,
-                        sweepAngle = 360f * (masteryPercent / 100f),
-                        useCenter = false,
-                        style = Stroke(width = 8.dp.toPx(), cap = StrokeCap.Round)
+                    
+                    if (total > 0) {
+                        val correctAngle = (correct.toFloat() / total) * 360f
+                        val hardAngle = (hard.toFloat() / total) * 360f
+                        val wrongAngle = (wrong.toFloat() / total) * 360f
+                        
+                        var currentStartAngle = -90f
+                        
+                        // Rysowanie Dobre
+                        if (correct > 0) {
+                            drawArc(
+                                color = goodColor,
+                                startAngle = currentStartAngle,
+                                sweepAngle = correctAngle,
+                                useCenter = false,
+                                style = Stroke(width = strokeWidth, cap = StrokeCap.Butt)
+                            )
+                            currentStartAngle += correctAngle
+                        }
+                        
+                        // Rysowanie Trudne
+                        if (hard > 0) {
+                            drawArc(
+                                color = secondaryColor,
+                                startAngle = currentStartAngle,
+                                sweepAngle = hardAngle,
+                                useCenter = false,
+                                style = Stroke(width = strokeWidth, cap = StrokeCap.Butt)
+                            )
+                            currentStartAngle += hardAngle
+                        }
+                        
+                        // Rysowanie Złe
+                        if (wrong > 0) {
+                            drawArc(
+                                color = errorColor,
+                                startAngle = currentStartAngle,
+                                sweepAngle = wrongAngle,
+                                useCenter = false,
+                                style = Stroke(width = strokeWidth, cap = StrokeCap.Butt)
+                            )
+                        }
+                    }
+                }
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text = "${masteryPercent.toInt()}%",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 }
-                Text(
-                    text = "${masteryPercent.toInt()}%",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
             }
         }
+    }
+}
+
+@Composable
+fun RatingDot(color: Color, label: String) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Box(
+            modifier = Modifier
+                .size(10.dp)
+                .background(color, androidx.compose.foundation.shape.CircleShape)
+        )
+        Spacer(modifier = Modifier.width(6.dp))
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelMedium,
+            fontWeight = FontWeight.Medium,
+            color = MaterialTheme.colorScheme.onSurface
+        )
     }
 }
 
@@ -182,16 +302,35 @@ fun MasteryCard(stats: StatsDto) {
 fun BarChartCard(dataMap: Map<String, Long>) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
+            contentColor = MaterialTheme.colorScheme.onSurface
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+        shape = MaterialTheme.shapes.large
     ) {
         Column(
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(20.dp)
         ) {
-            Text("Fiszki w ostatnich 7 dniach", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                "📊 Fiszki w ostatnich 7 dniach", 
+                style = MaterialTheme.typography.titleMedium, 
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Spacer(modifier = Modifier.height(24.dp))
 
             if (dataMap.isEmpty()) {
-                Text("Brak danych za ostatnie 7 dni.", style = MaterialTheme.typography.bodyMedium)
+                Box(
+                    modifier = Modifier.fillMaxWidth().height(150.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        "Brak danych za ostatnie 7 dni.", 
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
                 return@Column
             }
 
@@ -202,57 +341,93 @@ fun BarChartCard(dataMap: Map<String, Long>) {
             val data = last7Days.map { date ->
                 val dateStr = date.format(formatter)
                 val count = dataMap[dateStr] ?: 0L
-                val label = date.dayOfWeek.name.take(3)
+                val label = date.dayOfWeek.name.take(3).uppercase()
                 Pair(label, count)
             }
 
             val maxCount = data.maxOfOrNull { it.second }?.coerceAtLeast(5L) ?: 5L
-            val barColor = MaterialTheme.colorScheme.primary
 
-            Canvas(
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(200.dp)
-                    .padding(top = 16.dp)
-            ) {
-                val barWidth = size.width / (data.size * 2f)
-                val maxBarHeight = size.height - 40.dp.toPx()
-
-                data.forEachIndexed { index, pair ->
-                    val (label, count) = pair
-                    val barHeight = (count.toFloat() / maxCount) * maxBarHeight
-                    val x = (index * 2 * barWidth) + (barWidth / 2f)
-                    val y = size.height - 40.dp.toPx() - barHeight
-
-                    drawRoundRect(
-                        color = barColor,
-                        topLeft = Offset(x, y),
-                        size = Size(barWidth, barHeight),
-                        cornerRadius = CornerRadius(4.dp.toPx())
-                    )
-
-                    // Draw text (simplified by not using TextMeasurer for compatibility, just drawing basic shape if needed,
-                    // but Compose Canvas doesn't have a simple drawText without TextMeasurer.
-                    // We can use native canvas or just rely on an overlay.
-                    // Actually, a better approach for text is to use Row/Column overlay or TextMeasurer.
-                }
-            }
-            
-            // Labels Row
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                    .height(180.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Bottom
             ) {
                 data.forEach { pair ->
-                    Text(
-                        text = pair.first,
-                        style = MaterialTheme.typography.labelSmall,
-                        fontSize = 10.sp,
-                        modifier = Modifier.weight(1f),
-                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                    BarChartItem(
+                        label = pair.first,
+                        count = pair.second,
+                        maxCount = maxCount,
+                        modifier = Modifier.weight(1f)
                     )
                 }
             }
         }
+    }
+}
+
+@Composable
+fun BarChartItem(label: String, count: Long, maxCount: Long, modifier: Modifier = Modifier) {
+    val heightFraction = if (maxCount > 0) count.toFloat() / maxCount.toFloat() else 0f
+    val primaryColor = MaterialTheme.colorScheme.primary
+    val secondaryColor = MaterialTheme.colorScheme.tertiary
+
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Bottom
+    ) {
+        // Liczba powtórek nad słupkiem
+        if (count > 0) {
+            Text(
+                text = count.toString(),
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.ExtraBold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        } else {
+            Text(
+                text = "0",
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+            )
+        }
+
+        Spacer(modifier = Modifier.height(6.dp))
+
+        // Pusty tor słupka
+        Box(
+            modifier = Modifier
+                .fillMaxWidth(0.5f)
+                .height(120.dp)
+                .background(primaryColor.copy(alpha = 0.1f), androidx.compose.foundation.shape.RoundedCornerShape(6.dp)),
+            contentAlignment = Alignment.BottomCenter
+        ) {
+            // Właściwy zapełniony słupek
+            if (count > 0) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .fillMaxHeight(heightFraction)
+                        .background(
+                            brush = Brush.verticalGradient(listOf(primaryColor, secondaryColor)),
+                            shape = androidx.compose.foundation.shape.RoundedCornerShape(6.dp)
+                        )
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        // Etykieta dnia
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall,
+            fontSize = 11.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }
