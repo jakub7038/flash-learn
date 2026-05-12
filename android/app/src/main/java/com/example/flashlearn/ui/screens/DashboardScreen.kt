@@ -27,6 +27,7 @@ import com.example.flashlearn.ui.profile.ProfileViewModel
 fun DashboardScreen(
     onLogout: () -> Unit,
     onNavigateToSettings: () -> Unit,
+    onNavigateToStats: () -> Unit,
     viewModel: ProfileViewModel = hiltViewModel()
 ) {
     val logoutState by viewModel.logoutState.collectAsState()
@@ -116,6 +117,28 @@ fun DashboardScreen(
             Spacer(modifier = Modifier.width(8.dp))
             Text(
                 text = stringResource(R.string.btn_app_settings),
+                fontSize = 16.sp,
+                fontWeight = FontWeight.SemiBold
+            )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Button(
+            onClick = onNavigateToStats,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.tertiary,
+                contentColor = MaterialTheme.colorScheme.onTertiary
+            ),
+            shape = RoundedCornerShape(12.dp)
+        ) {
+            Icon(androidx.compose.material.icons.Icons.Default.DateRange, contentDescription = null)
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = stringResource(R.string.stats_title),
                 fontSize = 16.sp,
                 fontWeight = FontWeight.SemiBold
             )

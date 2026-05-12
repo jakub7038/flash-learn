@@ -30,7 +30,7 @@ public class SecurityConfig {
 
     /**
      * Konfiguruje łańcuch filtrów bezpieczeństwa.
-     * Publiczne: /auth/**, /swagger-ui/**, /v3/api-docs/**, /categories, /marketplace
+     * Publiczne: /auth/**, /swagger-ui/**, /v3/api-docs/**
      * Reszta wymaga autentykacji przez JWT.
      *
      * Obsługa błędów:
@@ -56,6 +56,7 @@ public class SecurityConfig {
                 .requestMatchers("/auth/**").permitAll()
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                 .requestMatchers("/categories").permitAll()
+                .requestMatchers("/error").permitAll()
                 .requestMatchers("/marketplace").permitAll()
                 .anyRequest().authenticated()
             )

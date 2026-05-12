@@ -52,8 +52,8 @@ public class StatsService {
         long wrong = 0, hard = 0, correct = 0;
         List<Object[]> ratingDist = studySessionRepository.findRatingDistribution(user.getId(), since30);
         for (Object[] row : ratingDist) {
-            int rating = (int) row[0];
-            long count = (long) row[1];
+            int rating = ((Number) row[0]).intValue();
+            long count = ((Number) row[1]).longValue();
             if (rating == 0)      wrong   = count;
             else if (rating == 1) hard    = count;
             else if (rating == 2) correct = count;
@@ -61,7 +61,11 @@ public class StatsService {
         long total = wrong + hard + correct;
 
         // Streak — unikalne dni nauki w ostatnich 30 dniach
-        List<LocalDate> studyDays = studySessionRepository.findDistinctStudyDays(user.getId(), since30);
+        List<LocalDate> studyDays = studySessionRepository.findStudySessionDates(user.getId(), since30)
+                .stream()
+                .map(LocalDateTime::toLocalDate)
+                .distinct()
+                .toList();
         int currentStreak = calculateCurrentStreak(studyDays);
         int longestStreak = calculateLongestStreak(studyDays);
 
@@ -83,9 +87,10 @@ public class StatsService {
         List<Object[]> rows = studySessionRepository.findCardsPerDay(userId, since);
         Map<String, Long> result = new LinkedHashMap<>();
         for (Object[] row : rows) {
-            LocalDate date = (LocalDate) row[0];
-            Long count     = (Long) row[1];
-            result.put(date.format(DATE_FMT), count);
+            // Unikanie ClassCastException na java.sql.Date
+            String dateStr = row[0].toString();
+            Long count     = ((Number) row[1]).longValue();
+            result.put(dateStr, count);
         }
         return result;
     }

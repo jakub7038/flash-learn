@@ -171,4 +171,21 @@
     <string name="btn_app_settings">Ustawienia aplikacji</string>
 
 
+    <!-- Stats Screen -->
+    <string name="stats_title">Statystyki</string>
+    <string name="content_desc_refresh">Odśwież</string>
+    <string name="stats_btn_retry">Spróbuj ponownie</string>
+    
+    <string name="stats_streak_title">🔥 Seria nauki</string>
+    <string name="stats_streak_current">Obecny</string>
+    <string name="stats_streak_best">Najlepszy</string>
+    
+    <string name="stats_mastery_title">🎯 Opanowanie materiału</string>
+    <string name="stats_mastery_subtitle">Na podstawie ostatnich 30 dni</string>
+    <string name="stats_rate_good">%1$d Dobre</string>
+    <string name="stats_rate_hard">%1$d Trudne</string>
+    <string name="stats_rate_wrong">%1$d Złe</string>
+    
+    <string name="stats_history_title">📊 Fiszki w ostatnich 7 dniach</string>
+    <string name="stats_history_empty">Brak danych za ostatnie 7 dni.</string>
 </resources>

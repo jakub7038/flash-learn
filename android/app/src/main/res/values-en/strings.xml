@@ -174,4 +174,21 @@
 
 
 
+    <!-- Stats Screen -->
+    <string name="stats_title">Statistics</string>
+    <string name="content_desc_refresh">Refresh</string>
+    <string name="stats_btn_retry">Try again</string>
+    
+    <string name="stats_streak_title">🔥 Study Streak</string>
+    <string name="stats_streak_current">Current</string>
+    <string name="stats_streak_best">Best</string>
+    
+    <string name="stats_mastery_title">🎯 Material Mastery</string>
+    <string name="stats_mastery_subtitle">Based on past 30 days</string>
+    <string name="stats_rate_good">%1$d Good</string>
+    <string name="stats_rate_hard">%1$d Hard</string>
+    <string name="stats_rate_wrong">%1$d Wrong</string>
+    
+    <string name="stats_history_title">📊 Flashcards over last 7 days</string>
+    <string name="stats_history_empty">No data for past 7 days.</string>
 </resources>

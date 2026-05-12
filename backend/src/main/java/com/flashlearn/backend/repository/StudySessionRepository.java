@@ -28,10 +28,10 @@ public interface StudySessionRepository extends JpaRepository<StudySession, Long
      * Zwraca unikalne dni nauki użytkownika w podanym przedziale.
      * Używane do obliczenia streaku.
      */
-    @Query("SELECT DISTINCT CAST(s.finishedAt AS date) FROM StudySession s " +
+    @Query("SELECT s.finishedAt FROM StudySession s " +
             "WHERE s.user.id = :userId AND s.finishedAt >= :since " +
-            "ORDER BY CAST(s.finishedAt AS date)")
-    List<LocalDate> findDistinctStudyDays(
+            "ORDER BY s.finishedAt")
+    List<LocalDateTime> findStudySessionDates(
             @Param("userId") Long userId,
             @Param("since") LocalDateTime since);
 
@@ -48,9 +48,9 @@ public interface StudySessionRepository extends JpaRepository<StudySession, Long
 
     /**
      * Zlicza fiszki uczone per dzień w podanym przedziale.
-     * Wynik: [date, count]
+     * Wynik: [date, count] (date jako obiekt zależny od dialektu)
      */
-    @Query("SELECT CAST(r.reviewedAt AS date), COUNT(r) FROM StudySessionResult r " +
+    @Query("SELECT CAST(r.reviewedAt AS date) as reviewDate, COUNT(r) FROM StudySessionResult r " +
             "WHERE r.session.user.id = :userId AND r.reviewedAt >= :since " +
             "GROUP BY CAST(r.reviewedAt AS date) " +
             "ORDER BY CAST(r.reviewedAt AS date)")

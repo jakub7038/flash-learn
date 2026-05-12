@@ -9,6 +9,12 @@ import com.flashlearn.data.dao.FlashcardProgressDao
 import com.flashlearn.data.entity.Flashcard
 import com.flashlearn.data.entity.FlashcardProgress
 import com.example.flashlearn.domain.sm2.SM2Engine
+import com.example.flashlearn.data.remote.dto.SessionRequest
+import com.example.flashlearn.data.remote.dto.SessionResultRequest
+import com.example.flashlearn.data.repository.SessionRepository
+import java.time.LocalDateTime
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -23,6 +29,7 @@ class LearnViewModel @Inject constructor(
     private val flashcardProgressDao: FlashcardProgressDao,
     private val deckDao: DeckDao,
     private val syncManager: com.example.flashlearn.sync.SyncManager,
+    private val sessionRepository: SessionRepository,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
@@ -43,8 +50,13 @@ class LearnViewModel @Inject constructor(
     private var unknownCount = 0
 
     private var deckTitle = ""
+    private var deckServerId: Long? = null
 
     private var earliestNextReview: Long? = null
+
+    // Session tracking for backend
+    private var startedAt: LocalDateTime? = null
+    private val sessionResults = mutableListOf<SessionResultRequest>()
 
     // Init
 
@@ -76,6 +88,17 @@ class LearnViewModel @Inject constructor(
                 1 -> hardCount++
                 else -> knownCount++
             }
+            
+            // Add to session results if card has serverId
+            current.card.serverId?.let { sid ->
+                val backendRating = when (grade) {
+                    0 -> 0
+                    1 -> 1
+                    else -> 2
+                }
+                sessionResults.add(SessionResultRequest(flashcardId = sid, rating = backendRating))
+            }
+            
             advance()
         }
     }
@@ -91,6 +114,8 @@ class LearnViewModel @Inject constructor(
             hardCount = 0
             unknownCount = 0
             earliestNextReview = null
+            sessionResults.clear()
+            startedAt = LocalDateTime.now(ZoneOffset.UTC)
             val allCards = flashcardDao.getByDeck(deckId)
             if (allCards.isEmpty()) {
                 _uiState.value = LearnUiState.Empty(deckTitle, hasCards = false)
@@ -111,6 +136,9 @@ class LearnViewModel @Inject constructor(
         // Fetch deck title
         val deck = deckDao.getById(deckId)
         deckTitle = deck?.title ?: ""
+        deckServerId = deck?.serverId
+        startedAt = LocalDateTime.now(ZoneOffset.UTC)
+        sessionResults.clear()
 
         // Load all flashcards for the deck
         val allCards = flashcardDao.getByDeck(deckId)
@@ -142,6 +170,10 @@ class LearnViewModel @Inject constructor(
                 unknownCount = unknownCount,
                 nextSessionEpochDay = earliestNextReview
             )
+            
+            // Send session to backend
+            pushSessionToBackend()
+            
             syncManager.scheduleSync()
             return
         }
@@ -204,6 +236,29 @@ class LearnViewModel @Inject constructor(
                     nextReviewEpochDay = result.nextReviewDate.toEpochDay(),
                 )
             )
+        }
+    }
+
+    private fun pushSessionToBackend() {
+        if (sessionResults.isEmpty() || deckServerId == null || startedAt == null) return
+
+        val finishedAt = LocalDateTime.now(ZoneOffset.UTC)
+
+        val request = SessionRequest(
+            deckId = deckServerId!!,
+            startedAt = startedAt!!.toString(),
+            finishedAt = finishedAt.toString(),
+            results = sessionResults.toList()
+        )
+
+        viewModelScope.launch {
+            sessionRepository.saveSession(request).collect { result ->
+                result.onSuccess {
+                    // Session saved
+                }.onFailure {
+                    // Could log the error
+                }
+            }
         }
     }
 }

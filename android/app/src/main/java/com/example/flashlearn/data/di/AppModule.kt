@@ -7,8 +7,12 @@ import com.example.flashlearn.data.remote.AuthApiService
 import com.example.flashlearn.data.remote.RetrofitClient
 import com.example.flashlearn.data.remote.DeckApiService
 import com.example.flashlearn.data.remote.FlashcardApiService
+import com.example.flashlearn.data.remote.StatsApiService
+import com.example.flashlearn.data.remote.SessionApiService
 import com.example.flashlearn.data.repository.DeckRepository
 import com.example.flashlearn.data.repository.FlashcardRepository
+import com.example.flashlearn.data.repository.StatsRepository
+import com.example.flashlearn.data.repository.SessionRepository
 import com.example.flashlearn.domain.repository.AuthRepository
 import com.example.flashlearn.sync.SyncManager
 import com.flashlearn.data.dao.DeckDao
@@ -90,6 +94,30 @@ object AppModule {
     @Singleton
     fun provideFlashcardApiService(): FlashcardApiService {
         return RetrofitClient.flashcardApi
+    }
+
+    @Provides
+    @Singleton
+    fun provideStatsApiService(): StatsApiService {
+        return RetrofitClient.statsApi
+    }
+
+    @Provides
+    @Singleton
+    fun provideStatsRepository(statsApi: StatsApiService): StatsRepository {
+        return StatsRepository(statsApi)
+    }
+
+    @Provides
+    @Singleton
+    fun provideSessionApiService(): SessionApiService {
+        return RetrofitClient.sessionApi
+    }
+
+    @Provides
+    @Singleton
+    fun provideSessionRepository(sessionApi: SessionApiService): SessionRepository {
+        return SessionRepository(sessionApi)
     }
 
     @Provides

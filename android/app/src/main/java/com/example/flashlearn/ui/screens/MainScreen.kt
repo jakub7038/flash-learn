@@ -61,6 +61,7 @@ fun MainScreen(
 
 
     var isSettingsOpen by rememberSaveable { mutableStateOf(false) }
+    var isStatsOpen by rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(isOnline) {
         if (!isOnline) {
@@ -79,6 +80,7 @@ fun MainScreen(
     LaunchedEffect(selectedIndex) {
         if (items[selectedIndex] != BottomNavItem.Profile) {
             isSettingsOpen = false
+            isStatsOpen = false
         }
     }
 
@@ -163,10 +165,15 @@ fun MainScreen(
                             SettingsScreen(
                                 onBack = { isSettingsOpen = false }
                             )
+                        } else if (isStatsOpen) {
+                            com.example.flashlearn.ui.screens.stats.StatsScreen(
+                                onBack = { isStatsOpen = false }
+                            )
                         } else {
                             DashboardScreen(
                                 onLogout = onLogout,
-                                onNavigateToSettings = { isSettingsOpen = true }
+                                onNavigateToSettings = { isSettingsOpen = true },
+                                onNavigateToStats = { isStatsOpen = true }
                             )
                         }
                     }
