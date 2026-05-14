@@ -11,6 +11,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -34,7 +35,8 @@ import java.util.*
 fun DeckListScreen(
     viewModel: DeckListViewModel = hiltViewModel(),
     onNavigateToCreateDeck: () -> Unit = {},
-    onNavigateToDeckDetail: (deckId: Long) -> Unit = {}
+    onNavigateToDeckDetail: (deckId: Long) -> Unit = {},
+    onNavigateToEditDeck: (deckId: Long) -> Unit = {}
 ) {
     val decks by viewModel.decks.collectAsState()
     val categories by viewModel.categories.collectAsState()
@@ -87,6 +89,7 @@ fun DeckListScreen(
                             deck = deck,
                             categories = categories,
                             onClick = { onNavigateToDeckDetail(deck.id) },
+                            onEdit = { onNavigateToEditDeck(deck.id) },
                             onDelete = { viewModel.deleteDeck(deck.id) }
                         )
                     }
@@ -101,6 +104,7 @@ fun DeckCard(
     deck: DeckWithCount,
     categories: List<CategoryDto> = emptyList(),
     onClick: () -> Unit = {},
+    onEdit: () -> Unit = {},
     onDelete: () -> Unit
 ) {
     val dateFormatter = remember { SimpleDateFormat("dd MMM yyyy", Locale.getDefault()) }
@@ -193,13 +197,21 @@ fun DeckCard(
                 }
             }
 
-            // Usuń
-            IconButton(onClick = onDelete) {
-                Icon(
-                    Icons.Default.Delete,
-                    contentDescription = stringResource(R.string.content_desc_delete_deck),
-                    tint = MaterialTheme.colorScheme.error
-                )
+            Row {
+                IconButton(onClick = onEdit) {
+                    Icon(
+                        Icons.Default.Edit,
+                        contentDescription = stringResource(R.string.content_desc_edit_deck),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+                IconButton(onClick = onDelete) {
+                    Icon(
+                        Icons.Default.Delete,
+                        contentDescription = stringResource(R.string.content_desc_delete_deck),
+                        tint = MaterialTheme.colorScheme.error
+                    )
+                }
             }
         }
     }

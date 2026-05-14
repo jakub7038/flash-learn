@@ -95,6 +95,9 @@ class MainActivity : AppCompatActivity() {
                             onNavigateToDeckDetail = { deckId ->
                                 navController.navigate("deck/$deckId/detail")
                             },
+                            onNavigateToEditDeck = { deckId ->
+                                navController.navigate("deck/edit/$deckId")
+                            },
                             onNavigateToLearn = { deckId ->
                                 navController.navigate("learn/$deckId")
                             }
@@ -121,6 +124,7 @@ class MainActivity : AppCompatActivity() {
                         DeckDetailScreen(
                             deckId = deckId,
                             onNavigateBack = { navController.popBackStack() },
+                            onNavigateToEditDeck = { id -> navController.navigate("deck/edit/$id") },
                             onNavigateToLearn = { id -> navController.navigate("learn/$id") },
                             onNavigateToFlashcards = { id -> navController.navigate("deck/$id/flashcards") }
                         )

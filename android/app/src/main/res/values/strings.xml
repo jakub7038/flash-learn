@@ -67,6 +67,7 @@
     <!-- DeckListScreen -->
     <string name="content_desc_new_deck">Nowa talia</string>
     <string name="my_decks_title">Moje talie</string>
+    <string name="content_desc_edit_deck">Edytuj talię</string>
     <string name="content_desc_delete_deck">Usuń talię</string>
     <string name="empty_decks_title">Brak talii</string>
     <string name="empty_decks_message">Stwórz swoją pierwszą talię fiszek\ni zacznij naukę już dziś!</string>
@@ -147,6 +148,7 @@
     <string name="deck_detail_mastery_desc">Odsetek fiszek, które pomyślnie utrwaliłeś. Wyższy % to lepsza pamięć długotrwała.</string>
     <string name="deck_detail_start_learning">Rozpocznij naukę</string>
     <string name="deck_detail_manage_flashcards">Zarządzaj fiszkami</string>
+    <string name="deck_detail_edit_deck">Edytuj talię</string>
 
     <!-- Learn session UI -->
     <string name="learn_session_title">Sesja nauki</string>
