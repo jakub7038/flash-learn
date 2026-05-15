@@ -81,14 +81,11 @@ class AuthRepositoryImpl @Inject constructor(
     }
 
     override fun saveTokens(accessToken: String, refreshToken: String) {
-        prefs.edit()
-            .putString("access_token", accessToken)
-            .putString("refresh_token", refreshToken)
-            .apply()
+        TokenManager.saveTokens(accessToken, refreshToken)
     }
 
     override fun clearTokens() {
-        prefs.edit().clear().apply()
+        TokenManager.clearTokens()
     }
 
     override fun getAccessToken(): String? = prefs.getString("access_token", null)

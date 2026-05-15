@@ -19,7 +19,7 @@ object RetrofitClient {
 
     private val authInterceptor = Interceptor { chain ->
         val requestBuilder = chain.request().newBuilder()
-        prefs?.getString("access_token", null)?.let { token ->
+        TokenManager.getAccessToken()?.let { token ->
             requestBuilder.addHeader("Authorization", "Bearer $token")
         }
         chain.proceed(requestBuilder.build())
@@ -32,7 +32,7 @@ object RetrofitClient {
 
     fun init(context: Context) {
         Config.init(context)
-        prefs = context.getSharedPreferences("flashlearn_prefs", Context.MODE_PRIVATE)
+        TokenManager.init(context)
         retrofit = Retrofit.Builder()
             .baseUrl(Config.getBaseUrl())
             .client(okHttpClient)
