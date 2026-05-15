@@ -251,4 +251,52 @@ public class MarketplaceService {
         return userRepository.findByEmail(auth.getName())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found"));
     }
+
+/**
+     * Pobiera szczegóły publicznej talii wraz z listą fiszek (read-only).
+     *
+     * @param id identyfikator talii
+     * @return szczegóły talii i fiszek
+     * @throws DeckNotFoundException gdy talia nie istnieje lub nie jest publiczna
+     */
+  @Transactional(readOnly = true)
+    public MarketplaceDeckDetailsResponse getDeckDetails(Long id) {
+        Deck deck = deckRepository.findById(id)
+                .orElseThrow(() -> new DeckNotFoundException(id));
+
+        if (!deck.isPublic()) {
+            throw new DeckNotFoundException(id);
+        }
+
+       
+        List<com.flashlearn.backend.flashcard.FlashcardResponse> flashcards = flashcardRepository.findByDeckId(id).stream()
+                .map(f -> new com.flashlearn.backend.flashcard.FlashcardResponse(
+                        f.getId(), 
+                        f.getDeck().getId(), 
+                        f.getQuestion(), 
+                        f.getAnswer(),
+                        f.getCreatedAt(),
+                        f.getUpdatedAt()
+                ))
+                .toList();
+      
+
+        Long categoryId = deck.getCategory() != null ? deck.getCategory().getId() : null;
+        String categoryName = deck.getCategory() != null ? deck.getCategory().getName() : null;
+        String categoryIcon = deck.getCategory() != null ? deck.getCategory().getIconName() : null;
+
+        return new MarketplaceDeckDetailsResponse(
+                deck.getId(),
+                deck.getTitle(),
+                deck.getDescription(),
+                deck.getOwner().getEmail(),
+                categoryId,
+                categoryName,
+                categoryIcon,
+                flashcards,
+                deck.getDownloadCount(),
+                deck.getCreatedAt()
+        );
+    }
+
 }

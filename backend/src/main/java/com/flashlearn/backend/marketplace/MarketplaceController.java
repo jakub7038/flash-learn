@@ -91,4 +91,17 @@ public class MarketplaceController {
         marketplaceService.report(request);
         return ResponseEntity.noContent().build();
     }
+
+    @Operation(summary = "Pobierz szczegóły publicznej talii",
+            description = "Zwraca dane talii wraz z listą fiszek (read-only). Nie wymaga JWT.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Szczegóły talii z fiszkami"),
+            @ApiResponse(responseCode = "404", description = "Talia nie istnieje lub nie jest publiczna")
+    })
+    @GetMapping("/{id}")
+    public ResponseEntity<MarketplaceDeckDetailsResponse> getDeckDetails(@PathVariable Long id) {
+        return ResponseEntity.ok(marketplaceService.getDeckDetails(id));
+    }
+
+
 }

@@ -7,6 +7,7 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -76,7 +77,8 @@ private fun iconForName(name: String?): ImageVector = when (name) {
 
 @Composable
 fun MarketplaceScreen(
-    viewModel: MarketplaceViewModel = hiltViewModel()
+    viewModel: MarketplaceViewModel = hiltViewModel(),
+    onDeckClick: (Long) -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -128,7 +130,8 @@ fun MarketplaceScreen(
                     decks       = uiState.decks,
                     cloningId   = uiState.cloningId,
                     onClone     = viewModel::cloneDeck,
-                    onRefresh   = viewModel::refresh
+                    onRefresh   = viewModel::refresh,
+                    onDeckClick = onDeckClick // Przekazanie w dół
                 )
             }
         }
@@ -201,7 +204,8 @@ private fun DeckList(
     decks: List<MarketplaceDeckDto>,
     cloningId: Long?,
     onClone: (Long) -> Unit,
-    onRefresh: () -> Unit
+    onRefresh: () -> Unit,
+    onDeckClick: (Long) -> Unit // Dodano parametr
 ) {
     if (decks.isEmpty()) {
         EmptyMarketplace(onRefresh = onRefresh)
@@ -217,7 +221,8 @@ private fun DeckList(
             MarketplaceDeckCard(
                 deck      = deck,
                 isCloning = cloningId == deck.id,
-                onClone   = { onClone(deck.id) }
+                onClone   = { onClone(deck.id) },
+                onClick   = { onDeckClick(deck.id) } // Przekazanie akcji do karty
             )
         }
         // Mały padding na dole
@@ -233,15 +238,18 @@ private fun DeckList(
 private fun MarketplaceDeckCard(
     deck: MarketplaceDeckDto,
     isCloning: Boolean,
-    onClone: () -> Unit
+    onClone: () -> Unit,
+    onClick: () -> Unit // Dodano parametr do sygnatury
 ) {
     val category = CATEGORIES.firstOrNull { it.slug == deck.categorySlug }
     // Ikona — preferuj categoryIconName zwrócone przez backend, fallback do Icons.Default.Style
     val categoryIcon = iconForName(deck.categoryIconName)
 
     Card(
-        modifier  = Modifier.fillMaxWidth(),
-        shape     = RoundedCornerShape(16.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() }, // Użycie przekazanej lambdy
+        shape = RoundedCornerShape(16.dp), // Poprawiono brakujący przecinek
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         colors    = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant

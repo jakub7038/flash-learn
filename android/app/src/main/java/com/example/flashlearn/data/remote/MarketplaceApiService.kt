@@ -1,8 +1,11 @@
 package com.example.flashlearn.data.remote
 
 import com.example.flashlearn.data.remote.dto.CloneResponseDto
+import com.example.flashlearn.data.remote.dto.MarketplaceDeckDetailsDto
 import com.example.flashlearn.data.remote.dto.MarketplacePageDto
+import com.example.flashlearn.data.remote.dto.ReportRequestDto
 import retrofit2.Response
+import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
@@ -31,5 +34,12 @@ interface MarketplaceApiService {
      */
     @POST("/marketplace/{id}/clone")
     suspend fun cloneDeck(@Path("id") deckId: Long): Response<CloneResponseDto>
+
+    @GET("/marketplace/{id}")
+    suspend fun getDeckDetails(@Path("id") deckId: Long): Response<MarketplaceDeckDetailsDto>
+
+    @POST("/marketplace/report")
+    suspend fun reportDeck(@Body request: ReportRequestDto): Response<Void>
+
 }
 

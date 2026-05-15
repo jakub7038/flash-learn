@@ -1,7 +1,9 @@
 package com.example.flashlearn.data.repository
 
 import com.example.flashlearn.data.remote.MarketplaceApiService
+import com.example.flashlearn.data.remote.dto.MarketplaceDeckDetailsDto
 import com.example.flashlearn.data.remote.dto.MarketplaceDeckDto
+import com.example.flashlearn.data.remote.dto.ReportRequestDto
 import com.flashlearn.data.dao.DeckDao
 import com.flashlearn.data.dao.FlashcardDao
 import com.flashlearn.data.entity.Deck
@@ -72,5 +74,21 @@ class MarketplaceRepository @Inject constructor(
             flashcardDao.insertAll(flashcards)
         }
     }
+
+    suspend fun getDeckDetails(deckId: Long): MarketplaceDeckDetailsDto {
+        val response = api.getDeckDetails(deckId)
+        if (response.isSuccessful) {
+            return response.body() ?: error("Empty response body")
+        }
+        error("Failed to fetch deck details: HTTP ${response.code()}")
+    }
+
+    suspend fun reportDeck(deckId: Long, reason: String? = null) {
+        val response = api.reportDeck(ReportRequestDto(deckId, reason))
+        if (!response.isSuccessful) {
+            error("Report failed: HTTP ${response.code()}")
+        }
+    }
+
 }
 

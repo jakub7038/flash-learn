@@ -207,6 +207,21 @@
     <string name="theme_dark">Ciemny</string>
 
 
+    <string name="dialog_clone_title">Potwierdzenie klonowania</string>
+    <string name="dialog_clone_message">Czy na pewno chcesz sklonować tę talię do swojej prywatnej biblioteki?</string>
+    <string name="dialog_report_title">Zgłoś talię</string>
+    <string name="dialog_report_message">Dlaczego chcesz zgłosić tę talię jako nieodpowiednią?</string>
+    <string name="dialog_report_reason_label">Powód (opcjonalnie)</string>
+    <string name="dialog_report_confirm">Wyślij zgłoszenie</string>
+    <string name="marketplace_deck_details_title">Szczegóły talii</string>
+    <string name="content_desc_report">Zgłoś</string>
+    <string name="fab_clone_to_library">Klonuj do biblioteki</string>
+    <string name="marketplace_deck_author">Autor: %1$s</string>
+    <string name="marketplace_deck_downloads">Pobrań: %1$d</string>
+    <string name="marketplace_deck_category">Kategoria: %1$s</string>
+    <string name="marketplace_deck_flashcards_count">Fiszki (%1$d)</string>
+
+
     <!-- Stats Screen -->
     <string name="stats_title">Statystyki</string>
     <string name="content_desc_refresh">Odśwież</string>

@@ -1,42 +1,37 @@
 package com.example.flashlearn
 
 import android.content.Context
+import android.os.Build
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.flashlearn.data.remote.RetrofitClient
+import com.example.flashlearn.data.local.TokenManager
 import com.example.flashlearn.notification.ReminderScheduler
 import com.example.flashlearn.ui.screens.DeckDetailScreen
 import com.example.flashlearn.ui.screens.DeckEditScreen
 import com.example.flashlearn.ui.screens.FlashcardEditScreen
 import com.example.flashlearn.ui.screens.FlashcardListScreen
-import com.example.flashlearn.ui.screens.LoginScreen
 import com.example.flashlearn.ui.screens.LearnScreen
+import com.example.flashlearn.ui.screens.LoginScreen
 import com.example.flashlearn.ui.screens.MainScreen
+import com.example.flashlearn.ui.screens.MarketplaceDeckDetailScreen // Dodany import
 import com.example.flashlearn.ui.screens.RegisterScreen
 import com.example.flashlearn.ui.theme.FlashLearnTheme
 import dagger.hilt.android.AndroidEntryPoint
-import androidx.appcompat.app.AppCompatActivity
 
-import android.os.Build
-import androidx.activity.result.contract.ActivityResultContracts
-
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.WorkManager
-import com.example.flashlearn.data.local.TokenManager
-import com.example.flashlearn.sync.ReminderWorker
-import java.util.concurrent.TimeUnit
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
     val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         com.example.flashlearn.notification.NotificationHelper.createNotificationChannel(this)
@@ -45,12 +40,13 @@ class MainActivity : AppCompatActivity() {
             requestPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
         }
 
-        val prefs = getSharedPreferences("settings", 0)
+        val prefs = getSharedPreferences("settings", Context.MODE_PRIVATE)
         ReminderScheduler.schedule(this, prefs)
         TokenManager.init(applicationContext)
 
-        val authprefs = applicationContext.getSharedPreferences("flashlearn_prefs", android.content.Context.MODE_PRIVATE)
-        val hasToken = prefs.getString("access_token", null) != null
+        val authprefs = applicationContext.getSharedPreferences("flashlearn_prefs", Context.MODE_PRIVATE)
+        // Poprawka 1: Użycie authprefs zamiast prefs do weryfikacji tokena
+        val hasToken = authprefs.getString("access_token", null) != null
 
         enableEdgeToEdge()
         setContent {
@@ -74,10 +70,10 @@ class MainActivity : AppCompatActivity() {
                     }
                     composable("register") {
                         RegisterScreen(
-                            onRegisterSuccess = { 
+                            onRegisterSuccess = {
                                 navController.navigate("login") {
                                     popUpTo(0)
-                                } 
+                                }
                             },
                             onNavigateToLogin = { navController.popBackStack() }
                         )
@@ -100,9 +96,26 @@ class MainActivity : AppCompatActivity() {
                             },
                             onNavigateToLearn = { deckId ->
                                 navController.navigate("learn/$deckId")
+                            },
+                            onNavigateToMarketplaceDetail = { deckId ->
+                                navController.navigate("marketplace_detail/$deckId")
                             }
                         )
                     }
+
+                    composable(
+                        route = "marketplace_detail/{deckId}",
+                        arguments = listOf(navArgument("deckId") { type = NavType.LongType })
+                    ) {
+                        // Poprawka 2: Wywołanie bezpośrednie z importem
+                        MarketplaceDeckDetailScreen(
+                            onNavigateBack = { navController.popBackStack() },
+                            onNavigateToLocalDecks = {
+                                navController.popBackStack("main", inclusive = false)
+                            }
+                        )
+                    }
+
                     composable("deck/create") {
                         DeckEditScreen(
                             onNavigateBack = { navController.popBackStack() }

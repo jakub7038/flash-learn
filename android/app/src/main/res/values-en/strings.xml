@@ -206,7 +206,19 @@
     <string name="theme_light">Light</string>
     <string name="theme_dark">Dark</string>
 
-
+    <string name="dialog_clone_title">Confirm cloning</string>
+    <string name="dialog_clone_message">Are you sure you want to clone this deck to your private library?</string>
+    <string name="dialog_report_title">Report deck</string>
+    <string name="dialog_report_message">Why do you want to report this deck as inappropriate?</string>
+    <string name="dialog_report_reason_label">Reason (optional)</string>
+    <string name="dialog_report_confirm">Send report</string>
+    <string name="marketplace_deck_details_title">Deck details</string>
+    <string name="content_desc_report">Report</string>
+    <string name="fab_clone_to_library">Clone to library</string>
+    <string name="marketplace_deck_author">Author: %1$s</string>
+    <string name="marketplace_deck_downloads">Downloads: %1$d</string>
+    <string name="marketplace_deck_category">Category: %1$s</string>
+    <string name="marketplace_deck_flashcards_count">Flashcards (%1$d)</string>
 
     <!-- Stats Screen -->
     <string name="stats_title">Statistics</string>

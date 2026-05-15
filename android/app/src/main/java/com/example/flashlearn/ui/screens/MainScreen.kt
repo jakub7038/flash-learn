@@ -46,6 +46,7 @@ fun MainScreen(
     onNavigateToDeckDetail: (deckId: Long) -> Unit = {},
     onNavigateToEditDeck: (deckId: Long) -> Unit = {},
     onNavigateToLearn: (deckId: Long) -> Unit = {},
+    onNavigateToMarketplaceDetail: (deckId: Long) -> Unit = {},
     networkViewModel: NetworkViewModel = hiltViewModel()
 ) {
     val items = listOf(
@@ -161,7 +162,9 @@ fun MainScreen(
                         onNavigateToEditDeck = onNavigateToEditDeck
                     )
                     BottomNavItem.Create -> CreateScreen()
-                    BottomNavItem.Explore -> MarketplaceScreen()
+                    BottomNavItem.Explore -> MarketplaceScreen(
+                        onDeckClick = onNavigateToMarketplaceDetail
+                    )
                     BottomNavItem.Profile -> {
                         if (isSettingsOpen) {
                             SettingsScreen(
