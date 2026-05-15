@@ -24,3 +24,12 @@ data class RegisterResponse(
 data class LogoutRequest(
     val refreshToken: String
 )
+
+data class RefreshTokenRequest(
+    val refreshToken: String
+)
+
+data class RefreshTokenResponse(
+    val accessToken: String,
+    val refreshToken: String
+)

@@ -45,9 +45,7 @@ class MainActivity : AppCompatActivity() {
         ReminderScheduler.schedule(this, prefs)
         TokenManager.init(applicationContext)
 
-        val authprefs = applicationContext.getSharedPreferences("flashlearn_prefs", Context.MODE_PRIVATE)
-        // Poprawka 1: Użycie authprefs zamiast prefs do weryfikacji tokena
-        val hasToken = authprefs.getString("access_token", null) != null
+        val hasToken = TokenManager.isLoggedIn()
 
         enableEdgeToEdge()
         setContent {

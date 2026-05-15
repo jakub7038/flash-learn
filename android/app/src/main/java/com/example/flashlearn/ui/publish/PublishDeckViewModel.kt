@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import com.example.flashlearn.sync.SyncManager
 
 sealed interface PublishUiState {
     /** Trwa ładowanie kategorii / talii */
@@ -23,6 +24,7 @@ sealed interface PublishUiState {
     data class Ready(
         val deckTitle: String,
         val deckServerId: Long?,          // null gdy talia nie jest zsynchronizowana
+        val isSyncing: Boolean,
         val categories: List<CategoryDto>,
         val selectedCategoryId: Long?,
         val description: String,
@@ -41,6 +43,7 @@ class PublishDeckViewModel @Inject constructor(
     private val deckDao: DeckDao,
     private val categoryRepository: CategoryRepository,
     private val marketplaceRepository: MarketplaceRepository,
+    private val syncManager: SyncManager,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -54,25 +57,35 @@ class PublishDeckViewModel @Inject constructor(
     val submitError: StateFlow<String?> = _submitError.asStateFlow()
 
     init {
+        syncManager.scheduleSync()
         load()
     }
 
     private fun load() {
         viewModelScope.launch {
             runCatching {
-                // Pełna encja Deck (zawiera serverId)
-                val deck = deckDao.getById(deckId)
-                    ?: error("Talia o id=$deckId nie istnieje")
-                val categories = categoryRepository.getCategories()
-                Pair(deck, categories)
-            }.onSuccess { (deck, categories) ->
-                _uiState.value = PublishUiState.Ready(
-                    deckTitle = deck.title,
-                    deckServerId = deck.serverId,
-                    categories = categories,
-                    selectedCategoryId = categories.firstOrNull()?.id,
-                    description = deck.description.orEmpty()
-                )
+                categoryRepository.getCategories()
+            }.onSuccess { categories ->
+                deckDao.observeById(deckId).collect { deck ->
+                    if (deck == null) {
+                        _uiState.value = PublishUiState.Error("Talia o id=$deckId nie istnieje")
+                        return@collect
+                    }
+                    val current = _uiState.value
+                    if (current is PublishUiState.Ready && current.isSubmitting) return@collect
+                    if (current is PublishUiState.Success) return@collect
+
+                    _uiState.value = PublishUiState.Ready(
+                        deckTitle = deck.title,
+                        deckServerId = deck.serverId,
+                        isSyncing = deck.serverId == null,
+                        categories = categories,
+                        selectedCategoryId = (current as? PublishUiState.Ready)?.selectedCategoryId
+                            ?: categories.firstOrNull()?.id,
+                        description = (current as? PublishUiState.Ready)?.description
+                            ?: deck.description.orEmpty()
+                    )
+                }
             }.onFailure { e ->
                 _uiState.value = PublishUiState.Error(
                     e.message ?: "Błąd ładowania danych"

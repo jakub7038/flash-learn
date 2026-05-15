@@ -57,6 +57,14 @@ interface DeckDao {
     @Query("SELECT * FROM decks WHERE id = :id LIMIT 1")
     suspend fun getById(id: Long): Deck?
 
+    /**
+     * Obserwuje talię o podanym lokalnym identyfikatorze.
+     * Emituje nową wartość gdy rekord się zmieni (np. po synchronizacji –
+     * gdy pojawi się [Deck.serverId]).
+     */
+    @Query("SELECT * FROM decks WHERE id = :id LIMIT 1")
+    fun observeById(id: Long): Flow<Deck?>
+
     /** Zwraca talię powiązaną z identyfikatorem serwera lub null. */
     @Query("SELECT * FROM decks WHERE server_id = :serverId LIMIT 1")
     suspend fun getByServerId(serverId: Long): Deck?

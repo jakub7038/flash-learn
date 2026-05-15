@@ -172,12 +172,20 @@ private fun PublishForm(
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.onSecondaryContainer
                     )
-                    if (state.deckServerId == null) {
-                        Text(
-                            text = "⚠ Talia nie jest zsynchronizowana – najpierw włącz sync",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.error
-                        )
+                    if (state.isSyncing) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(12.dp),
+                                color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                strokeWidth = 2.dp
+                            )
+                            Spacer(Modifier.width(6.dp))
+                            Text(
+                                text = "Trwa synchronizacja...",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSecondaryContainer
+                            )
+                        }
                     }
                 }
             }
@@ -249,7 +257,7 @@ private fun PublishForm(
         // ── Przycisk Opublikuj ───────────────────────────────────────────────
         Button(
             onClick = onSubmit,
-            enabled = !state.isSubmitting && state.selectedCategoryId != null,
+            enabled = !state.isSubmitting && !state.isSyncing && state.selectedCategoryId != null,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),

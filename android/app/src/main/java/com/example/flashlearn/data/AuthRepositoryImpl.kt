@@ -1,6 +1,6 @@
 package com.example.flashlearn.data
 
-import android.content.SharedPreferences
+import com.example.flashlearn.data.local.TokenManager
 import com.example.flashlearn.data.remote.AuthApiService
 import com.example.flashlearn.data.remote.LoginRequest
 import com.example.flashlearn.data.remote.LoginResponse
@@ -20,7 +20,6 @@ import javax.inject.Inject
 
 class AuthRepositoryImpl @Inject constructor(
     private val api: AuthApiService,
-    private val prefs: SharedPreferences,
     private val db: AppDatabase
 ) : AuthRepository {
 
@@ -29,15 +28,14 @@ class AuthRepositoryImpl @Inject constructor(
             val response = api.login(LoginRequest(email, password))
             if (response.isSuccessful && response.body() != null) {
                 val body = response.body()!!
+                TokenManager.saveTokens(body.accessToken, body.refreshToken)
                 // Zapisz email i datę pierwszego logowania (jeśli nie istnieje)
-                if (prefs.getString("email", null) == null ||
-                    prefs.getString("email", null) != email
+                if (TokenManager.getEmail() == null ||
+                    TokenManager.getEmail() != email
                 ) {
                     val now = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()).format(Date())
-                    prefs.edit()
-                        .putString("email", email)
-                        .putString("registered_at", now)
-                        .apply()
+                    TokenManager.saveEmail(email)
+                    TokenManager.saveRegisteredAt(now)
                 }
                 Result.success(body)
             } else {
@@ -66,7 +64,7 @@ class AuthRepositoryImpl @Inject constructor(
     }
 
     override suspend fun logout(): Result<Unit> {
-        val refreshToken = prefs.getString("refresh_token", null) ?: ""
+        val refreshToken = TokenManager.getRefreshToken() ?: ""
         clearTokens()
         withContext(Dispatchers.IO) {
             db.clearAllTables()
@@ -88,18 +86,16 @@ class AuthRepositoryImpl @Inject constructor(
         TokenManager.clearTokens()
     }
 
-    override fun getAccessToken(): String? = prefs.getString("access_token", null)
+    override fun getAccessToken(): String? = TokenManager.getAccessToken()
 
-    override fun getRefreshToken(): String? = prefs.getString("refresh_token", null)
+    override fun getRefreshToken(): String? = TokenManager.getRefreshToken()
 
     override fun saveUserInfo(email: String, registeredAt: String) {
-        prefs.edit()
-            .putString("email", email)
-            .putString("registered_at", registeredAt)
-            .apply()
+        TokenManager.saveEmail(email)
+        TokenManager.saveRegisteredAt(registeredAt)
     }
 
-    override fun getEmail(): String? = prefs.getString("email", null)
+    override fun getEmail(): String? = TokenManager.getEmail()
 
-    override fun getRegisteredAt(): String? = prefs.getString("registered_at", null)
+    override fun getRegisteredAt(): String? = TokenManager.getRegisteredAt()
 }

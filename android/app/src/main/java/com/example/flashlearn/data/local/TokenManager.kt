@@ -55,5 +55,25 @@ object TokenManager {
         prefs.edit().clear().apply()
     }
 
+    fun migrateFrom(legacyPrefs: SharedPreferences) {
+        val legacyAccessToken = legacyPrefs.getString(KEY_ACCESS_TOKEN, null)
+        val legacyRefreshToken = legacyPrefs.getString(KEY_REFRESH_TOKEN, null)
+        if (getAccessToken() == null && legacyAccessToken != null && legacyRefreshToken != null) {
+            saveTokens(legacyAccessToken, legacyRefreshToken)
+            legacyPrefs.edit()
+                .remove(KEY_ACCESS_TOKEN)
+                .remove(KEY_REFRESH_TOKEN)
+                .apply()
+        }
+
+        if (getEmail() == null) {
+            legacyPrefs.getString(KEY_EMAIL, null)?.let(::saveEmail)
+        }
+
+        if (getRegisteredAt() == null) {
+            legacyPrefs.getString(KEY_REGISTERED_AT, null)?.let(::saveRegisteredAt)
+        }
+    }
+
     fun isLoggedIn(): Boolean = getAccessToken() != null
 }
