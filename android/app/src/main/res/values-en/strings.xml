@@ -67,6 +67,7 @@
     <!-- DeckListScreen -->
     <string name="content_desc_new_deck">New deck</string>
     <string name="my_decks_title">My decks</string>
+    <string name="content_desc_edit_deck">Edit deck</string>
     <string name="content_desc_delete_deck">Delete deck</string>
     <string name="empty_decks_title">No decks</string>
     <string name="empty_decks_message">Create your first flashcard deck\nand start learning today!</string>
@@ -89,6 +90,9 @@
     <string name="deck_new_title">New deck</string>
     <string name="label_deck_name">Deck name</string>
     <string name="label_description_optional">Description (optional)</string>
+    <string name="label_category">Category</string>
+    <string name="category_none">No category</string>
+    <string name="category_loading">Loading categories…</string>
 
     <!-- FlashcardListScreen -->
     <string name="dialog_delete_flashcard_title">Delete flashcard</string>
@@ -144,6 +148,7 @@
     <string name="deck_detail_mastery_desc">Percentage of flashcards successfully retained. Higher % means better long-term memory.</string>
     <string name="deck_detail_start_learning">Start learning</string>
     <string name="deck_detail_manage_flashcards">Manage flashcards</string>
+    <string name="deck_detail_edit_deck">Edit deck</string>
 
     <!-- Learn session UI -->
     <string name="learn_session_title">Learning session</string>

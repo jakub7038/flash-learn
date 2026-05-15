@@ -44,6 +44,7 @@ fun MainScreen(
     onLogout: () -> Unit,
     onNavigateToCreateDeck: () -> Unit = {},
     onNavigateToDeckDetail: (deckId: Long) -> Unit = {},
+    onNavigateToEditDeck: (deckId: Long) -> Unit = {},
     onNavigateToLearn: (deckId: Long) -> Unit = {},
     networkViewModel: NetworkViewModel = hiltViewModel()
 ) {
@@ -156,7 +157,8 @@ fun MainScreen(
                     )
                     BottomNavItem.MyDecks -> DeckListScreen(
                         onNavigateToCreateDeck = onNavigateToCreateDeck,
-                        onNavigateToDeckDetail = onNavigateToDeckDetail
+                        onNavigateToDeckDetail = onNavigateToDeckDetail,
+                        onNavigateToEditDeck = onNavigateToEditDeck
                     )
                     BottomNavItem.Create -> CreateScreen()
                     BottomNavItem.Explore -> MarketplaceScreen()

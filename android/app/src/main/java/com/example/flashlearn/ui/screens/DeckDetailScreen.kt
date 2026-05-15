@@ -30,6 +30,7 @@ import com.example.flashlearn.ui.deckdetail.DeckDetailViewModel
 fun DeckDetailScreen(
     deckId: Long,
     onNavigateBack: () -> Unit,
+    onNavigateToEditDeck: (deckId: Long) -> Unit,
     onNavigateToLearn: (deckId: Long) -> Unit,
     onNavigateToFlashcards: (deckId: Long) -> Unit,
     viewModel: DeckDetailViewModel = hiltViewModel()
@@ -51,10 +52,19 @@ fun DeckDetailScreen(
                         )
                     }
                 },
+                actions = {
+                    IconButton(onClick = { onNavigateToEditDeck(deckId) }) {
+                        Icon(
+                            imageVector = Icons.Default.Edit,
+                            contentDescription = stringResource(R.string.content_desc_edit_deck)
+                        )
+                    }
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background,
                     titleContentColor = MaterialTheme.colorScheme.onBackground,
-                    navigationIconContentColor = MaterialTheme.colorScheme.onBackground
+                    navigationIconContentColor = MaterialTheme.colorScheme.onBackground,
+                    actionIconContentColor = MaterialTheme.colorScheme.primary
                 )
             )
         },
@@ -121,6 +131,15 @@ fun DeckDetailScreen(
                     Icon(Icons.Default.Edit, contentDescription = null)
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(stringResource(R.string.deck_detail_manage_flashcards), style = MaterialTheme.typography.titleMedium)
+                }
+
+                TextButton(
+                    onClick = { onNavigateToEditDeck(deckId) },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Icon(Icons.Default.Edit, contentDescription = null)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(stringResource(R.string.deck_detail_edit_deck))
                 }
             }
         }

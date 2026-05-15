@@ -26,6 +26,8 @@ public class SyncDeckDTO {
 
     private boolean isPublic;
 
+    private String categorySlug;
+
     @NotNull(message = "UpdatedAt is required")
     private LocalDateTime updatedAt;
 

@@ -52,6 +52,10 @@ object RetrofitClient {
         get() = retrofit?.create(DeckApiService::class.java)
             ?: throw IllegalStateException("RetrofitClient not initialized. Call init(context) first.")
 
+    val categoryApi: CategoryApiService
+        get() = retrofit?.create(CategoryApiService::class.java)
+            ?: throw IllegalStateException("RetrofitClient not initialized. Call init(context) first.")
+
     val flashcardApi: FlashcardApiService
         get() = retrofit?.create(FlashcardApiService::class.java)
             ?: throw IllegalStateException("RetrofitClient not initialized. Call init(context) first.")

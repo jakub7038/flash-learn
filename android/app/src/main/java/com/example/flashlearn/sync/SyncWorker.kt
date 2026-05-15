@@ -50,6 +50,7 @@ class SyncWorker @AssistedInject constructor(
                         title = it.title,
                         description = it.description,
                         isPublic = it.isPublic,
+                        categorySlug = it.categorySlug,
                         updatedAt = Instant.ofEpochSecond(it.updatedAt).atZone(ZoneOffset.UTC).format(DateTimeFormatter.ISO_DATE_TIME)
                     )
                 }
@@ -112,6 +113,7 @@ class SyncWorker @AssistedInject constructor(
                         title = dto.title,
                         description = dto.description,
                         isPublic = dto.isPublic,
+                        categorySlug = dto.categorySlug,
                         updatedAt = updatedAtEpoch,
                         needsSync = false
                     ))
@@ -121,6 +123,7 @@ class SyncWorker @AssistedInject constructor(
                         title = dto.title,
                         description = dto.description,
                         isPublic = dto.isPublic,
+                        categorySlug = dto.categorySlug,
                         updatedAt = updatedAtEpoch,
                         needsSync = false
                     ))

@@ -6,6 +6,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Style
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -129,6 +130,13 @@ fun DeckEditScreen(
                     modifier = Modifier.fillMaxWidth()
                 )
 
+                CategoryDropdown(
+                    categories = uiState.categories,
+                    selectedSlug = uiState.selectedCategorySlug,
+                    isLoading = uiState.isCategoriesLoading,
+                    onSelect = viewModel::onCategorySelected
+                )
+
                 Button(
                     onClick = {
                         viewModel.save(errTitleRequired, errTitleMinLength, errTitleMaxLength)
@@ -149,4 +157,82 @@ fun DeckEditScreen(
             }
         }
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun CategoryDropdown(
+    categories: List<com.example.flashlearn.data.remote.dto.CategoryDto>,
+    selectedSlug: String?,
+    isLoading: Boolean,
+    onSelect: (String?) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+    val selectedCategory = categories.firstOrNull { it.slug == selectedSlug }
+    val selectedName = selectedCategory?.name ?: categoryNameForSlug(selectedSlug)
+    val selectedIcon = selectedCategory?.iconName?.let(::iconForCategoryName)
+        ?: iconForCategorySlug(selectedSlug)
+
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = it },
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        OutlinedTextField(
+            value = if (isLoading) stringResource(R.string.category_loading) else selectedName,
+            onValueChange = {},
+            readOnly = true,
+            enabled = !isLoading,
+            label = { Text(stringResource(R.string.label_category)) },
+            leadingIcon = {
+                Icon(
+                    imageVector = selectedIcon,
+                    contentDescription = null
+                )
+            },
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+            modifier = Modifier
+                .menuAnchor(MenuAnchorType.PrimaryNotEditable)
+                .fillMaxWidth()
+        )
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.category_none)) },
+                leadingIcon = { Icon(Icons.Default.Style, contentDescription = null) },
+                onClick = {
+                    onSelect(null)
+                    expanded = false
+                }
+            )
+            categories.forEach { category ->
+                DropdownMenuItem(
+                    text = { Text(category.name) },
+                    leadingIcon = {
+                        Icon(
+                            imageVector = iconForCategoryName(category.iconName),
+                            contentDescription = null
+                        )
+                    },
+                    onClick = {
+                        onSelect(category.slug)
+                        expanded = false
+                    }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun categoryNameForSlug(slug: String?): String = when (slug) {
+    "jezyki" -> stringResource(R.string.marketplace_cat_languages)
+    "programowanie" -> stringResource(R.string.marketplace_cat_programming)
+    "matematyka" -> stringResource(R.string.marketplace_cat_math)
+    "nauki-scisle" -> stringResource(R.string.marketplace_cat_science)
+    "historia" -> stringResource(R.string.marketplace_cat_history)
+    "inne" -> stringResource(R.string.marketplace_cat_other)
+    else -> stringResource(R.string.category_none)
 }

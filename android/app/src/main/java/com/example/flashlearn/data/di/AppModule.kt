@@ -4,12 +4,14 @@ import android.content.Context
 import android.content.SharedPreferences
 import com.example.flashlearn.data.AuthRepositoryImpl
 import com.example.flashlearn.data.remote.AuthApiService
+import com.example.flashlearn.data.remote.CategoryApiService
 import com.example.flashlearn.data.remote.RetrofitClient
 import com.example.flashlearn.data.remote.DeckApiService
 import com.example.flashlearn.data.remote.FlashcardApiService
 import com.example.flashlearn.data.remote.MarketplaceApiService
 import com.example.flashlearn.data.remote.StatsApiService
 import com.example.flashlearn.data.remote.SessionApiService
+import com.example.flashlearn.data.repository.CategoryRepository
 import com.example.flashlearn.data.repository.DeckRepository
 import com.example.flashlearn.data.repository.FlashcardRepository
 import com.example.flashlearn.data.repository.MarketplaceRepository
@@ -90,6 +92,18 @@ object AppModule {
     @Singleton
     fun provideDeckApiService(): DeckApiService {
         return RetrofitClient.deckApi
+    }
+
+    @Provides
+    @Singleton
+    fun provideCategoryApiService(): CategoryApiService {
+        return RetrofitClient.categoryApi
+    }
+
+    @Provides
+    @Singleton
+    fun provideCategoryRepository(categoryApi: CategoryApiService): CategoryRepository {
+        return CategoryRepository(categoryApi)
     }
 
     @Provides

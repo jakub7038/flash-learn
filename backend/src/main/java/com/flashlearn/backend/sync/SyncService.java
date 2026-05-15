@@ -4,6 +4,7 @@ import com.flashlearn.backend.exception.ResourceAccessDeniedException;
 import com.flashlearn.backend.model.Deck;
 import com.flashlearn.backend.model.Flashcard;
 import com.flashlearn.backend.model.User;
+import com.flashlearn.backend.repository.CategoryRepository;
 import com.flashlearn.backend.repository.DeckRepository;
 import com.flashlearn.backend.repository.FlashcardRepository;
 import com.flashlearn.backend.repository.UserRepository;
@@ -33,6 +34,7 @@ public class SyncService {
     private final DeckRepository deckRepository;
     private final FlashcardRepository flashcardRepository;
     private final UserRepository userRepository;
+    private final CategoryRepository categoryRepository;
 
     /**
      * Przetwarza zmiany przyslane z urzadzenia mobilnego.
@@ -108,6 +110,7 @@ public class SyncService {
             dto.setTitle(deck.getTitle());
             dto.setDescription(deck.getDescription());
             dto.setPublic(deck.isPublic());
+            dto.setCategorySlug(deck.getCategory() != null ? deck.getCategory().getSlug() : null);
             dto.setUpdatedAt(deck.getUpdatedAt());
             dto.setFlashcards(List.of());
             return dto;
@@ -148,6 +151,9 @@ public class SyncService {
                     .title(dto.getTitle())
                     .description(dto.getDescription())
                     .isPublic(dto.isPublic())
+                    .category(dto.getCategorySlug() != null
+                            ? categoryRepository.findBySlug(dto.getCategorySlug()).orElse(null)
+                            : null)
                     .build();
             deck = deckRepository.save(deck);
             if (dto.getLocalId() != null) {
@@ -170,6 +176,9 @@ public class SyncService {
                     existing.setTitle(dto.getTitle());
                     existing.setDescription(dto.getDescription());
                     existing.setPublic(dto.isPublic());
+                    existing.setCategory(dto.getCategorySlug() != null
+                            ? categoryRepository.findBySlug(dto.getCategorySlug()).orElse(null)
+                            : null);
                     deckRepository.save(existing);
                     return "Deck conflict (client-wins): id=" + dto.getId();
                 }
@@ -180,6 +189,9 @@ public class SyncService {
             existing.setTitle(dto.getTitle());
             existing.setDescription(dto.getDescription());
             existing.setPublic(dto.isPublic());
+            existing.setCategory(dto.getCategorySlug() != null
+                    ? categoryRepository.findBySlug(dto.getCategorySlug()).orElse(null)
+                    : null);
             deckRepository.save(existing);
             return null;
         }).orElse(null);

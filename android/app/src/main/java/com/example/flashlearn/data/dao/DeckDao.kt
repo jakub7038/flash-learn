@@ -14,6 +14,7 @@ data class DeckWithCount(
     val title: String,
     val description: String?,
     val updatedAt: Long,
+    val categorySlug: String?,
     val flashcardCount: Int
 )
 
@@ -32,7 +33,8 @@ interface DeckDao {
      * Obserwuje wszystkie talie posortowane od najnowszej, wraz z liczbą fiszek.
      */
     @Query("""
-        SELECT d.id, d.title, d.description, d.updated_at AS updatedAt, COUNT(f.id) AS flashcardCount
+        SELECT d.id, d.title, d.description, d.updated_at AS updatedAt,
+               d.category_slug AS categorySlug, COUNT(f.id) AS flashcardCount
         FROM decks d
         LEFT JOIN flashcards f ON d.id = f.deck_id
         GROUP BY d.id
@@ -142,7 +144,8 @@ interface DeckDao {
      * Wyświetlane w sekcji "Gotowe zestawy" na liście talii.
      */
     @Query("""
-    SELECT d.id, d.title, d.description, d.updated_at AS updatedAt, COUNT(f.id) AS flashcardCount
+    SELECT d.id, d.title, d.description, d.updated_at AS updatedAt,
+           d.category_slug AS categorySlug, COUNT(f.id) AS flashcardCount
     FROM decks d
     LEFT JOIN flashcards f ON d.id = f.deck_id
     WHERE d.is_readonly = 1
@@ -155,7 +158,8 @@ interface DeckDao {
      * Obserwuje talie użytkownika (nie-readonly) posortowane od najnowszej.
      */
     @Query("""
-    SELECT d.id, d.title, d.description, d.updated_at AS updatedAt, COUNT(f.id) AS flashcardCount
+    SELECT d.id, d.title, d.description, d.updated_at AS updatedAt,
+           d.category_slug AS categorySlug, COUNT(f.id) AS flashcardCount
     FROM decks d
     LEFT JOIN flashcards f ON d.id = f.deck_id
     WHERE d.is_readonly = 0

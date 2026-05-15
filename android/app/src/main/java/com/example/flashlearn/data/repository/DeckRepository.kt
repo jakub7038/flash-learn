@@ -23,10 +23,15 @@ class DeckRepository @Inject constructor(
 
     suspend fun getDeckById(id: Long): Deck? = deckDao.getById(id)
 
-    suspend fun createDeck(title: String, description: String? = null): Long {
+    suspend fun createDeck(
+        title: String,
+        description: String? = null,
+        categorySlug: String? = null
+    ): Long {
         val deck = Deck(
             title = title,
             description = description,
+            categorySlug = categorySlug,
             createdAt = Instant.now().epochSecond,
             updatedAt = Instant.now().epochSecond,
         )
@@ -35,12 +40,18 @@ class DeckRepository @Inject constructor(
         return id
     }
 
-    suspend fun updateDeck(id: Long, title: String, description: String?) {
+    suspend fun updateDeck(
+        id: Long,
+        title: String,
+        description: String?,
+        categorySlug: String? = null
+    ) {
         val existing = deckDao.getById(id) ?: return
         deckDao.update(
             existing.copy(
                 title = title,
                 description = description,
+                categorySlug = categorySlug,
                 updatedAt = Instant.now().epochSecond,
                 needsSync = true
             )

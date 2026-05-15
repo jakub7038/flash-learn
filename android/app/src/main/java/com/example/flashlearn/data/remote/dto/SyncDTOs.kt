@@ -34,6 +34,7 @@ data class SyncDeckDTO(
     val title: String,
     val description: String?,
     @SerializedName("public") val isPublic: Boolean,
+    val categorySlug: String? = null,
     val updatedAt: String,
     val flashcards: List<SyncFlashcardDTO>? = null
 )

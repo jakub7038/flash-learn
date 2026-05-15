@@ -11,6 +11,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -24,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.runtime.collectAsState
 import com.example.flashlearn.R
+import com.example.flashlearn.data.remote.dto.CategoryDto
 import com.example.flashlearn.ui.decklist.DeckListViewModel
 import com.flashlearn.data.dao.DeckWithCount
 import java.text.SimpleDateFormat
@@ -33,9 +35,11 @@ import java.util.*
 fun DeckListScreen(
     viewModel: DeckListViewModel = hiltViewModel(),
     onNavigateToCreateDeck: () -> Unit = {},
-    onNavigateToDeckDetail: (deckId: Long) -> Unit = {}
+    onNavigateToDeckDetail: (deckId: Long) -> Unit = {},
+    onNavigateToEditDeck: (deckId: Long) -> Unit = {}
 ) {
     val decks by viewModel.decks.collectAsState()
+    val categories by viewModel.categories.collectAsState()
 
     Scaffold(
         floatingActionButton = {
@@ -83,7 +87,9 @@ fun DeckListScreen(
                     items(decks, key = { it.id }) { deck ->
                         DeckCard(
                             deck = deck,
+                            categories = categories,
                             onClick = { onNavigateToDeckDetail(deck.id) },
+                            onEdit = { onNavigateToEditDeck(deck.id) },
                             onDelete = { viewModel.deleteDeck(deck.id) }
                         )
                     }
@@ -94,11 +100,21 @@ fun DeckListScreen(
 }
 
 @Composable
-fun DeckCard(deck: DeckWithCount, onClick: () -> Unit = {}, onDelete: () -> Unit) {
+fun DeckCard(
+    deck: DeckWithCount,
+    categories: List<CategoryDto> = emptyList(),
+    onClick: () -> Unit = {},
+    onEdit: () -> Unit = {},
+    onDelete: () -> Unit
+) {
     val dateFormatter = remember { SimpleDateFormat("dd MMM yyyy", Locale.getDefault()) }
     val lastModified = remember(deck.updatedAt) {
         dateFormatter.format(Date(deck.updatedAt * 1000L))
     }
+    val category = categories.firstOrNull { it.slug == deck.categorySlug }
+    val categoryName = category?.name ?: categoryNameForSlug(deck.categorySlug)
+    val categoryIcon = category?.iconName?.let(::iconForCategoryName)
+        ?: iconForCategorySlug(deck.categorySlug)
 
     Card(
         onClick = onClick,
@@ -115,7 +131,6 @@ fun DeckCard(deck: DeckWithCount, onClick: () -> Unit = {}, onDelete: () -> Unit
                 .padding(horizontal = 16.dp, vertical = 14.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Ikona
             Box(
                 modifier = Modifier
                     .size(48.dp)
@@ -124,7 +139,7 @@ fun DeckCard(deck: DeckWithCount, onClick: () -> Unit = {}, onDelete: () -> Unit
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    imageVector = Icons.Default.Star,
+                    imageVector = categoryIcon,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.onPrimaryContainer,
                     modifier = Modifier.size(24.dp)
@@ -143,6 +158,25 @@ fun DeckCard(deck: DeckWithCount, onClick: () -> Unit = {}, onDelete: () -> Unit
                     overflow = TextOverflow.Ellipsis
                 )
                 Spacer(modifier = Modifier.height(2.dp))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Icon(
+                        imageVector = categoryIcon,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(14.dp)
+                    )
+                    Text(
+                        text = categoryName,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+                Spacer(modifier = Modifier.height(4.dp))
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
@@ -163,16 +197,35 @@ fun DeckCard(deck: DeckWithCount, onClick: () -> Unit = {}, onDelete: () -> Unit
                 }
             }
 
-            // Usuń
-            IconButton(onClick = onDelete) {
-                Icon(
-                    Icons.Default.Delete,
-                    contentDescription = stringResource(R.string.content_desc_delete_deck),
-                    tint = MaterialTheme.colorScheme.error
-                )
+            Row {
+                IconButton(onClick = onEdit) {
+                    Icon(
+                        Icons.Default.Edit,
+                        contentDescription = stringResource(R.string.content_desc_edit_deck),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+                IconButton(onClick = onDelete) {
+                    Icon(
+                        Icons.Default.Delete,
+                        contentDescription = stringResource(R.string.content_desc_delete_deck),
+                        tint = MaterialTheme.colorScheme.error
+                    )
+                }
             }
         }
     }
+}
+
+@Composable
+private fun categoryNameForSlug(slug: String?): String = when (slug) {
+    "jezyki" -> stringResource(R.string.marketplace_cat_languages)
+    "programowanie" -> stringResource(R.string.marketplace_cat_programming)
+    "matematyka" -> stringResource(R.string.marketplace_cat_math)
+    "nauki-scisle" -> stringResource(R.string.marketplace_cat_science)
+    "historia" -> stringResource(R.string.marketplace_cat_history)
+    "inne" -> stringResource(R.string.marketplace_cat_other)
+    else -> stringResource(R.string.category_none)
 }
 
 @Composable
