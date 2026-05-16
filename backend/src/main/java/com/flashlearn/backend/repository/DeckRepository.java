@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface DeckRepository extends JpaRepository<Deck, Long> {
@@ -42,4 +43,7 @@ public interface DeckRepository extends JpaRepository<Deck, Long> {
         @Modifying
         @Query("UPDATE Deck d SET d.downloadCount = d.downloadCount + 1 WHERE d.id = :id")
         void incrementDownloadCount(@Param("id") Long id);
+
+        @Query("SELECT d FROM Deck d LEFT JOIN FETCH d.flashcards WHERE d.id = :id")
+        Optional<Deck> findByIdWithFlashcards(@Param("id") Long id);
 }
